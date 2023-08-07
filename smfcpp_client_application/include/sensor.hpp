@@ -3,11 +3,22 @@
 
 #include <tcp.hpp>
 #include <uart.hpp>
+#include <iostream>
 
 #include <CameraApi.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/video/video.hpp>
+
+extern "C" {
+    #include <libavutil/time.h>
+    #include <libavformat/avformat.h>
+    #include <libavutil/timestamp.h> 
+    #include <libavformat/avformat.h>    
+    #include <libavutil/opt.h>
+    #include <libavutil/imgutils.h>
+    #include <libswscale/swscale.h>
+}
 
 
 namespace smfcpp{
@@ -33,26 +44,23 @@ private:
     smfcpp::TimerBase::SharedPtr collect_timer;
 };
 
-class CameraClient: public tcp::Client{
+class CameraClient{
 public:
     SMFCPP_SMART_PTR_DEFINITIONS(CameraClient)
 
     CameraClient(const std::string & name, 
-        const std::string & ip_address, 
-        const int port);
+        const char * outputUrl);
 
     virtual ~CameraClient() = default;
 
-    void run(const std::string video_save_path, 
-        const int fps_span, 
-        const cv::Size size);
+    int run(const cv::Size size);
 
 
-    /**
-     * \param delay means that if the time exceeds the specified duration, 
-     *        then the system will give up sending the video.
-    */
-    void send_video(const std::string path, std::chrono::seconds delay);
+    // /**
+    //  * \param delay means that if the time exceeds the specified duration, 
+    //  *        then the system will give up sending the video.
+    // */
+    // void send_video(const std::string path, std::chrono::seconds delay);
 
 private:
     int                     iCameraCounts = 1;   // how many cameras are linked to the mother board
@@ -70,6 +78,7 @@ private:
     std::vector<uint8_t> img_data;
 
     std::timed_mutex m_mutex; //mutex for send video
+    const char * m_outputUrl;
 };
 
 

@@ -71,9 +71,8 @@ void UartClient::collect_data(){
 }
 
 CameraClient::CameraClient(const std::string & name, 
-        const std::string & ip_address, 
-        const int port)
-: tcp::Client(name, ip_address, port)
+    const char * outputUrl)
+: m_outputUrl(outputUrl)
 {
     CameraSdkInit(1);
 
@@ -128,73 +127,122 @@ CameraClient::CameraClient(const std::string & name,
     img_data.resize(tCapability.sResolutionRange.iHeightMax*tCapability.sResolutionRange.iWidthMax*3);
 }
 
-void CameraClient::run(const std::string video_save_path, 
-    const int fps_span, 
-    const cv::Size size)
+int CameraClient::run(const cv::Size size)
 {
-    Client::connect_to_server();
-    // fps_span, how long to save
-    cv::VideoWriter output_video;
-    int t = 0;
-    while(1){
-        int i_frames = 0;
-        std::string str_time(24, 0);
-        time_t timer;
-        time(&timer); 
-        strncpy(str_time.data(), asctime(localtime(&timer)), 24);
-        std::string pth = video_save_path + " " + str_time + ".mp4";
-        output_video.open(pth, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30.0, size);
-        while(1){   
-            if(CameraGetImageBuffer(hCamera,&sFrameInfo,&pbyBuffer,1000) == CAMERA_STATUS_SUCCESS){
-                CameraImageProcess(hCamera, pbyBuffer, img_data.data(), &sFrameInfo);
+    int width = static_cast<int>(size.width);
+    int height = static_cast<int>(size.height);
+    double fps = 30;
+
+    avformat_network_init();
+    AVFormatContext* m_octx = NULL;
+    AVOutputFormat* fmt = av_guess_format("flv", NULL, NULL);
+
+    avformat_alloc_output_context2(&m_octx, NULL, "flv", m_outputUrl);
+    if (!m_octx) {
+        std::cerr << "Could not create output context" << std::endl;
+        return -1;
+    }
+
+    AVCodec* codec = avcodec_find_encoder(fmt->video_codec);
+    AVStream* stream = avformat_new_stream(m_octx, codec);
+
+    // Set codec context parameters.
+    AVCodecContext* m_ctx = avcodec_alloc_context3(codec);
+    m_ctx->bit_rate = 40000;
+    m_ctx->width = width;
+    m_ctx->height = height;
+    m_ctx->time_base = (AVRational){1, static_cast<int>(fps)};
+    m_ctx->gop_size = 12;
+    m_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+
+    // Some formats want stream headers to be separate.
+    if (m_octx->oformat->flags & AVFMT_GLOBALHEADER) {
+        m_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    }
+
+    // Open the codec and set stream parameters.
+    avcodec_open2(m_ctx, codec, NULL);
+    avcodec_parameters_from_context(stream->codecpar, m_ctx);
+
+    av_dump_format(m_octx, 0, m_outputUrl, 1);
+
+    if (!(fmt->flags & AVFMT_NOFILE)) {
+        avio_open(&m_octx->pb, m_outputUrl, AVIO_FLAG_WRITE);
+    }
+
+    if(avformat_write_header(m_octx, NULL) < 0){
+        std::cout << "avformat write header error" << std::endl;
+    }
+
+    AVFrame* frame = av_frame_alloc();
+    AVPacket * pkt = av_packet_alloc();
+    int y_size = m_ctx->width * m_ctx->height;
+
+    // Allocate image data buffer.
+    uint8_t* picture_buf = (uint8_t *)av_malloc(y_size * 3 / 2);
+    av_image_fill_arrays(frame->data, frame->linesize, picture_buf, m_ctx->pix_fmt, m_ctx->width, m_ctx->height, 1);
+
+    frame->format = m_ctx->pix_fmt;
+    frame->width = m_ctx->width;
+    frame->height = m_ctx->height;
+
+    SwsContext* sws_ctx = sws_getContext(m_ctx->width, m_ctx->height, AV_PIX_FMT_BGR24, m_ctx->width, m_ctx->height, AV_PIX_FMT_YUV420P, SWS_BICUBIC, NULL, NULL, NULL);
+    while(1){   
+        if(CameraGetImageBuffer(hCamera,&sFrameInfo,&pbyBuffer,1000) == CAMERA_STATUS_SUCCESS){
+            CameraImageProcess(hCamera, pbyBuffer, img_data.data(), &sFrameInfo);
 
 
-                //although the argument's unit is different from the stamp that has unit of nanosecond, it could also tell the order.
-                
-                cv::Mat matImage(
-                        cv::Size(sFrameInfo.iWidth,sFrameInfo.iHeight), 
-                        sFrameInfo.uiMediaType == CAMERA_MEDIA_TYPE_MONO8 ? CV_8UC1 : CV_8UC3,
-                        img_data.data()
-                        );
-                cv::resize(matImage, matImage, size);
-                output_video.write(matImage);
-                cv::imshow("test", matImage);
-                cv::waitKey(30);
-                //在成功调用CameraGetImageBuffer后，必须调用CameraReleaseImageBuffer来释放获得的buffer。
-                //否则再次调用CameraGetImageBuffer时，程序将被挂起一直阻塞，直到其他线程中调用CameraReleaseImageBuffer来释放了buffer
-                CameraReleaseImageBuffer(hCamera,pbyBuffer);
+            //although the argument's unit is different from the stamp that has unit of nanosecond, it could also tell the order.
+            
+            cv::Mat matImage(
+                    cv::Size(sFrameInfo.iWidth,sFrameInfo.iHeight), 
+                    sFrameInfo.uiMediaType == CAMERA_MEDIA_TYPE_MONO8 ? CV_8UC1 : CV_8UC3,
+                    img_data.data()
+                    );
+            cv::resize(matImage, matImage, size);
+            cv::imshow("test", matImage);
+            cv::waitKey(1000 / fps);
+
+            const int stride[] = { static_cast<int>(matImage.step[0]) };
+            sws_scale(sws_ctx, &matImage.data, stride, 0, m_ctx->height, frame->data, frame->linesize);
+
+            frame->pts = av_gettime();
+
+            avcodec_send_frame(m_ctx, frame);
+            int ret = avcodec_receive_packet(m_ctx, pkt);
+            if (ret == 0) {
+                pkt->stream_index = stream->index;
+                pkt->dts = pkt->pts;
+
+                av_interleaved_write_frame(m_octx, pkt);
+                av_packet_unref(pkt);
+            } else {
+                // handle the error
+                // const char* error_msg = av_err2str(ret);
+                std::cerr << "Error receiving packet" << std::endl;
             }
-            if(++i_frames == fps_span){
-                output_video.release();
-                // this->send_video(pth.c_str());
-                // cv::waitKey(30);
-                std::thread send_thd(&CameraClient::send_video, this, pth);
-                send_thd.detach();
-                break;
-            }
+
+            //在成功调用CameraGetImageBuffer后，必须调用CameraReleaseImageBuffer来释放获得的buffer。
+            //否则再次调用CameraGetImageBuffer时，程序将被挂起一直阻塞，直到其他线程中调用CameraReleaseImageBuffer来释放了buffer
+            CameraReleaseImageBuffer(hCamera,pbyBuffer);
         }
     }
-}
 
-void CameraClient::send_video(const std::string path, 
-    std::chrono::seconds delay)
-{
-    std::unique_lock<std::timed_mutex> lock(m_mutex, std::defer_lock);
-    if(lock.try_lock_for(delay)){
-        struct stat buf;
-        int video_fd = open(path.c_str(), O_RDONLY);
-        if(video_fd < 0){
-            perror("open");
-        }
-        fstat(video_fd, &buf);
-        uint32_t video_size = buf.st_size;
-        std::vector<uint8_t> video_data;
-        video_data.resize(video_size);
-        read(video_fd, video_data.data(), video_size);
-        this->send_data(video_data);
-        close(video_fd);
+    av_write_trailer(m_octx);
+
+    // Clean up.
+    avio_closep(&m_octx->pb);
+    avcodec_free_context(&m_ctx);
+    av_frame_free(&frame);
+    av_free(picture_buf);
+
+    if (!(fmt->flags & AVFMT_NOFILE)) {
+        avio_closep(&m_octx->pb);
     }
-    remove(path.c_str());
+
+    avformat_free_context(m_octx);
+
+    return 0;
 }
 
 }
