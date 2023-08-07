@@ -1,0 +1,3 @@
+/home/taozewei/smartfarm_frame/smfcpp_tool/build/CMakeFiles/edit_cache.dir
+/home/taozewei/smartfarm_frame/smfcpp_tool/build/CMakeFiles/smfcpp_tool.dir
+/home/taozewei/smartfarm_frame/smfcpp_tool/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsmfcpp_tool.a  CMakeFiles/smfcpp_tool.dir/src/uart.cpp.o CMakeFiles/smfcpp_tool.dir/src/log.cpp.o
+/usr/bin/ranlib libsmfcpp_tool.a
