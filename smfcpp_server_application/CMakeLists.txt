@@ -1,14 +1,10 @@
-cmake_minimum_required(VERSION 3.5)
-
 project(smfcpp_server_application)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++17")
-
 file(GLOB SRC_LIST src/*.cpp)
-file(GLOB INC_DIRS ../*/include)
-file(GLOB LINK_DIRS ../*/build)
+file(GLOB INC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/*/include)
+# file(GLOB LINK_DIRS ../*/build)
 
-link_directories(${LINK_DIRS})
+# link_directories(${LINK_DIRS})
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 target_include_directories(${PROJECT_NAME} PUBLIC ${INC_DIRS})
