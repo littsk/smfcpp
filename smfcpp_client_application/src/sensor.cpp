@@ -135,7 +135,6 @@ int CameraClient::run(const cv::Size size)
 
     avformat_network_init();
     AVFormatContext* m_octx = NULL;
-    AVOutputFormat* fmt = av_guess_format("flv", NULL, NULL);
 
     avformat_alloc_output_context2(&m_octx, NULL, "flv", m_outputUrl);
     if (!m_octx) {
@@ -143,12 +142,17 @@ int CameraClient::run(const cv::Size size)
         return -1;
     }
 
-    AVCodec* codec = avcodec_find_encoder(fmt->video_codec);
+    // Change to use libx264 directly
+    AVCodec* codec = avcodec_find_encoder_by_name("libx264");
+    if (!codec) {
+        std::cerr << "Codec libx264 not found" << std::endl;
+        return -1;
+    }
     AVStream* stream = avformat_new_stream(m_octx, codec);
 
     // Set codec context parameters.
     AVCodecContext* m_ctx = avcodec_alloc_context3(codec);
-    m_ctx->bit_rate = 40000;
+    m_ctx->bit_rate = 400000;
     m_ctx->width = width;
     m_ctx->height = height;
     m_ctx->time_base = (AVRational){1, static_cast<int>(fps)};
@@ -160,13 +164,17 @@ int CameraClient::run(const cv::Size size)
         m_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    // Open the codec and set stream parameters.
-    avcodec_open2(m_ctx, codec, NULL);
+    AVDictionary *opts = NULL;
+    av_dict_set(&opts, "preset", "veryfast", 0);
+    av_dict_set(&opts, "tune", "zerolatency", 0);
+
+    avcodec_open2(m_ctx, codec, &opts);
+
     avcodec_parameters_from_context(stream->codecpar, m_ctx);
 
     av_dump_format(m_octx, 0, m_outputUrl, 1);
 
-    if (!(fmt->flags & AVFMT_NOFILE)) {
+    if (!(m_octx->oformat->flags & AVFMT_NOFILE)) {
         avio_open(&m_octx->pb, m_outputUrl, AVIO_FLAG_WRITE);
     }
 
@@ -235,8 +243,9 @@ int CameraClient::run(const cv::Size size)
     avcodec_free_context(&m_ctx);
     av_frame_free(&frame);
     av_free(picture_buf);
+    av_dict_free(&opts); // Free the options dictionary
 
-    if (!(fmt->flags & AVFMT_NOFILE)) {
+    if (!(m_octx->oformat->flags & AVFMT_NOFILE)) {
         avio_closep(&m_octx->pb);
     }
 
