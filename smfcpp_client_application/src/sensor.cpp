@@ -209,7 +209,7 @@ int CameraClient::run(const cv::Size size)
                     );
             cv::resize(matImage, matImage, size);
             cv::imshow("test", matImage);
-            cv::waitKey(1000 / fps);
+            cv::waitKey(1000 / (fps + 3));
 
             const int stride[] = { static_cast<int>(matImage.step[0]) };
             sws_scale(sws_ctx, &matImage.data, stride, 0, m_ctx->height, frame->data, frame->linesize);
