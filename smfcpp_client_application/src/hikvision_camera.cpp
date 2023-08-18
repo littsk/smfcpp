@@ -44,7 +44,12 @@ int CameraClient<T>::run(const cv::Size size){
         std::string ip_addr(ip_set[i], ip_set[i] + 16);
         std::string rtsp_addr = "rtsp://admin:ys88889999@" + ip_addr + ":554/h264/ch1/main/av_stream";
         std::cout << rtsp_addr << std::endl;
-        cap = cv::VideoCapture(rtsp_addr);
+        try{
+            cap = cv::VideoCapture(rtsp_addr);
+        }
+        catch(...){
+            continue;
+        }
         if(cap.isOpened() && cap.read(matImage)){
             break;
         }
