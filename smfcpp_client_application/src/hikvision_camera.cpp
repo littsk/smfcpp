@@ -29,10 +29,20 @@ int CameraClient<T>::run(const cv::Size size){
     NET_DVR_USER_LOGIN_INFO struLoginInfo = {0};
     NET_DVR_DEVICEINFO_V40 struDeviceInfoV40 = {0};
     struLoginInfo.bUseAsynLogin = false;
+    // struLoginInfo.wPort = 8000;
+    // memcpy(struLoginInfo.sDeviceAddress, "10.8.98.80", NET_DVR_DEV_ADDRESS_MAX_LEN);
+    memcpy(struLoginInfo.sUserName, "admin", NAME_LEN);
+    memcpy(struLoginInfo.sPassword, "ys88889999", NAME_LEN);
+
 
     char ip_set[16][16] = {};
     unsigned int n_ips = 0;
     int enable_bind = false;
+
+    int myret = NET_DVR_Login_V40(&struLoginInfo, &struDeviceInfoV40);
+    std::cout << "fuxx" << myret << std::endl;
+
+    
     NET_DVR_GetLocalIP(ip_set, &n_ips, &enable_bind);
 
     unsigned int err_number = NET_DVR_GetLastError();
