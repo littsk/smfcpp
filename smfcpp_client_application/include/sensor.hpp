@@ -5,8 +5,6 @@
 #include <uart.hpp>
 #include <iostream>
 
-#include <CameraApi.h>
-
 #include <opencv2/opencv.hpp>
 #include <opencv2/video/video.hpp>
 
@@ -22,6 +20,7 @@ extern "C" {
 
 
 namespace smfcpp{
+
 
 class UartClient: public tcp::Client
 {
@@ -44,6 +43,13 @@ private:
     smfcpp::TimerBase::SharedPtr collect_timer;
 };
 
+
+enum class CameraType {
+    MindVision,
+    HikVision
+};
+
+template<CameraType type>
 class CameraClient{
 public:
     SMFCPP_SMART_PTR_DEFINITIONS(CameraClient)
@@ -51,7 +57,7 @@ public:
     CameraClient(const std::string & name, 
         const char * outputUrl);
 
-    virtual ~CameraClient() = default;
+    virtual ~CameraClient();
 
     int run(const cv::Size size);
 
@@ -63,25 +69,14 @@ public:
     // void send_video(const std::string path, std::chrono::seconds delay);
 
 private:
-    int                     iCameraCounts = 1;   // how many cameras are linked to the mother board
-    int                     iStatus = -1;        //
-    tSdkCameraDevInfo       tCameraEnumList;     //
-    int                     hCamera;             // handle of the camera
-    tSdkCameraCapbility     tCapability;         // 设备描述信息
-    tSdkFrameHead           sFrameInfo;
-    BYTE*			        pbyBuffer;
-    int                     channel = 3;         // the channel of image, usually be 3
-
-    bool                    auto_expose = true;  // whether to auto tune the exposure time
-    int                     exposure_time = 4000;// if auto_expose == false, it will work
-
-    std::vector<uint8_t> img_data;
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 
     std::timed_mutex m_mutex; //mutex for send video
     const char * m_outputUrl;
 };
 
-
+#define REGISTER_TEMPLATE(T) template class CameraClient<T>;
 
 }
 
