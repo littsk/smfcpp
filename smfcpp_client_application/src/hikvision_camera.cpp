@@ -29,8 +29,8 @@ int CameraClient<T>::run(const cv::Size size){
     NET_DVR_USER_LOGIN_INFO struLoginInfo = {0};
     NET_DVR_DEVICEINFO_V40 struDeviceInfoV40 = {0};
     struLoginInfo.bUseAsynLogin = false;
-    // struLoginInfo.wPort = 8000;
-    // memcpy(struLoginInfo.sDeviceAddress, "10.8.98.80", NET_DVR_DEV_ADDRESS_MAX_LEN);
+    struLoginInfo.wPort = 554;
+    memcpy(struLoginInfo.sDeviceAddress, "192.168.124.85", NET_DVR_DEV_ADDRESS_MAX_LEN);
     memcpy(struLoginInfo.sUserName, "admin", NAME_LEN);
     memcpy(struLoginInfo.sPassword, "ys88889999", NAME_LEN);
 
