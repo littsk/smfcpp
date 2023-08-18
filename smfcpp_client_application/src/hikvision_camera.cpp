@@ -16,8 +16,8 @@ template<CameraType T>
 CameraClient<T>::CameraClient(
     const std::string & name, 
     const char * outputUrl)
+: m_outputUrl(outputUrl)
 {
-    
 }
 
 template<CameraType T>
