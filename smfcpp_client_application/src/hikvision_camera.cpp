@@ -39,11 +39,12 @@ int CameraClient<T>::run(const cv::Size size){
     // printf("\n%d\n", err_number);
 
     cv::VideoCapture cap;
+    cv::Mat matImage;
     for(int i = 0; i < n_ips; ++i){
         std::string ip_addr(ip_set[i], ip_set[i] + 16);
         std::string rtsp_addr = "rtsp://admin:ys88889999@" + ip_addr + ":554/h264/ch1/main/av_stream";
         cap = cv::VideoCapture(rtsp_addr);
-        if(cap.isOpened()){
+        if(cap.isOpened() && cap.read(matImage)){
             break;
         }
     }
@@ -121,7 +122,6 @@ int CameraClient<T>::run(const cv::Size size){
 
 
     while(cap.isOpened()){
-        cv::Mat matImage;
         bool succ = cap.read(matImage);
         if(!succ){
             std::cerr << "Error reading frame" << std::endl;
