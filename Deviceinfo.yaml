@@ -1,0 +1,11 @@
+DeviceType: hikvision
+
+
+HostIP: 192.168.124.10
+SubnetMaskNum: 24
+Port: 8000
+UserName: admin
+Password: ys88889999
+
+
+RtmpUrls: ["11", "22"]

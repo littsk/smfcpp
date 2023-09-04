@@ -1,10 +1,16 @@
 #include "sensor.hpp"
 #include <CameraApi.h>
-
+#include <opencv2/video/video.hpp>
+#include <opencv2/opencv.hpp>
 namespace smfcpp{
 
 template<CameraType T>
 CameraClient<T>::~CameraClient() = default;
+
+// template<CameraType T>
+// bool CameraClient<T>::is_open(){
+//     return m_is_open;
+// }
 
 template<CameraType T>
 struct CameraClient<T>::Impl {
@@ -80,8 +86,9 @@ CameraClient<T>::CameraClient(const std::string & name,
 }
 
 template<CameraType T>
-int CameraClient<T>::run(const cv::Size size)
+int CameraClient<T>::run()
 {
+    const cv::Size size = cv::Size(512, 384);
     int width = static_cast<int>(size.width);
     int height = static_cast<int>(size.height);
     double fps = 30;

@@ -1,6 +1,7 @@
 project(smfcpp_client_application)
 
 find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 find_path(FFMPEG_INCLUDE_DIRS libavcodec/avcodec.h)
 set(FFMPEG_LIB_NAMES avcodec avformat avutil swscale)
@@ -29,7 +30,13 @@ file(GLOB INC_DIRS ${CMAKE_SOURCE_DIR}/*/include)
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 target_include_directories(${PROJECT_NAME} PUBLIC ${INC_DIRS} ${OpenCV_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_LIBS} smfcpp smfcpp_tool smfcpp_tcp ${MindVison_LIBS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_LIBS} smfcpp smfcpp_tool smfcpp_tcp ${MindVison_LIBS} yaml-cpp)
 
-add_executable(camera_client camera_client.cpp)
-target_link_libraries(camera_client ${PROJECT_NAME})
+add_executable(video_suvailence video_suvailence.cpp)
+target_link_libraries(video_suvailence ${PROJECT_NAME})
+
+
+#test 
+add_executable(hik_test hik_test.cpp)
+target_include_directories(hik_test PUBLIC ${INC_DIRS} ${OpenCV_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
+target_link_libraries(hik_test ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_LIBS} smfcpp smfcpp_tool smfcpp_tcp ${MindVison_LIBS})

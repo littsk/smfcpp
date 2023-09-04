@@ -3,10 +3,10 @@
 
 #include <tcp.hpp>
 #include <uart.hpp>
-#include <iostream>
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/video/video.hpp>
+#include <iostream>
+#include <string>
+#include <vector>
 
 extern "C" {
     #include <libavutil/time.h>
@@ -49,6 +49,18 @@ enum class CameraType {
     HikVision
 };
 
+
+struct CameraConfig{
+    // these for hikvision
+    std::string ip;
+    std::string user_name;
+    std::string password;
+    unsigned short port;
+
+    // these for mindvision
+};
+
+
 template<CameraType type>
 class CameraClient{
 public:
@@ -59,8 +71,11 @@ public:
 
     virtual ~CameraClient();
 
-    int run(const cv::Size size);
+    bool init(const CameraConfig & camera_config);
 
+    int run();
+
+    bool is_open();
 
     // /**
     //  * \param delay means that if the time exceeds the specified duration, 
@@ -71,9 +86,8 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
-
-    std::timed_mutex m_mutex; //mutex for send video
     const char * m_outputUrl;
+    bool m_is_open = false;
 };
 
 #define REGISTER_TEMPLATE(T) template class CameraClient<T>;
