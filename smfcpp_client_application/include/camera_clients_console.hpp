@@ -18,16 +18,9 @@ public:
 
 
 private:
-    std::vector<CameraClient<CameraType::HikVision>::SharedPtr> m_cameras;
+    std::vector< std::shared_ptr<CameraClient<T>> > m_cameras;
 };
 
-
-template<typename T>
-class Obj
-{
-    T a;
-};
-template class Obj<int>;
 
 #define REGISTER_CameraClientsConsole(T) template class CameraClientsConsole<T>;
 

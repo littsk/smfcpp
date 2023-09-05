@@ -25,7 +25,15 @@ std::vector<CameraClient<CameraType::HikVision>::SharedPtr> get_all_device_by_lo
     }
     std::vector<CameraClient<CameraType::HikVision>::SharedPtr> hik_cameras;
     for(std::string const & ip : candidate_ips){
-        CameraClient<CameraType::HikVision>::SharedPtr hik_camera = CameraClient<CameraType::HikVision>::make_shared("camera" + ip, rtmp_urls_que.front().c_str());
+        CameraClient<CameraType::HikVision>::SharedPtr hik_camera;
+        if(!rtmp_urls_que.empty()){
+            hik_camera = CameraClient<CameraType::HikVision>::make_shared(
+                "camera" + ip, rtmp_urls_que.front());
+        }
+        else{
+            std::cerr << "rtmp_urls is not enough, please get more and fill them in to yaml" << std::endl;
+        }
+
         CameraConfig camera_config;
         camera_config.ip = ip;
         camera_config.user_name = user_name;
@@ -38,7 +46,6 @@ std::vector<CameraClient<CameraType::HikVision>::SharedPtr> get_all_device_by_lo
     }
 
     std::cout << "find " << hik_cameras.size() << " cameras." << std::endl;
-
     return hik_cameras;
 }  
 
@@ -90,6 +97,18 @@ CameraClientsConsole<T>::CameraClientsConsole(
 template<CameraType T>
 CameraClientsConsole<T>::~CameraClientsConsole(){
     NET_DVR_Cleanup();
+}
+
+template<CameraType T>
+void CameraClientsConsole<T>::run(){
+    std::vector<std::thread> thds;
+    for(auto item : m_cameras){
+        thds.emplace_back(&CameraClient<T>::run, item);
+    }
+
+    for(auto & thd : thds){
+        thd.join();
+    }
 }
 
 REGISTER_CameraClientsConsole(CameraType::HikVision)

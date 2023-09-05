@@ -5,4 +5,5 @@
 int main(){
     smfcpp::CameraClientsConsole<smfcpp::CameraType::HikVision> console("test");
     console.run();
+    return 0;
 }

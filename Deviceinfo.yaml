@@ -8,4 +8,4 @@ UserName: admin
 Password: ys88889999
 
 
-RtmpUrls: ["11", "22"]
+RtmpUrls: ["rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1691339863368"]

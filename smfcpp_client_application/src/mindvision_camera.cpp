@@ -29,8 +29,9 @@ struct CameraClient<T>::Impl {
 
 template<CameraType T>
 CameraClient<T>::CameraClient(const std::string & name, 
-    const char * outputUrl)
-: m_outputUrl(outputUrl)
+    const std::string & outputUrl)
+: m_outputUrl(outputUrl),
+  m_impl(new CameraClient<T>::Impl())
 {
     CameraSdkInit(1);
 
@@ -96,7 +97,7 @@ int CameraClient<T>::run()
     avformat_network_init();
     AVFormatContext* m_octx = NULL;
 
-    avformat_alloc_output_context2(&m_octx, NULL, "flv", m_outputUrl);
+    avformat_alloc_output_context2(&m_octx, NULL, "flv", m_outputUrl.c_str());
     if (!m_octx) {
         std::cerr << "Could not create output context" << std::endl;
         return -1;
@@ -132,10 +133,10 @@ int CameraClient<T>::run()
 
     avcodec_parameters_from_context(stream->codecpar, m_ctx);
 
-    av_dump_format(m_octx, 0, m_outputUrl, 1);
+    av_dump_format(m_octx, 0, m_outputUrl.c_str(), 1);
 
     if (!(m_octx->oformat->flags & AVFMT_NOFILE)) {
-        avio_open(&m_octx->pb, m_outputUrl, AVIO_FLAG_WRITE);
+        avio_open(&m_octx->pb, m_outputUrl.c_str(), AVIO_FLAG_WRITE);
     }
 
     if(avformat_write_header(m_octx, NULL) < 0){

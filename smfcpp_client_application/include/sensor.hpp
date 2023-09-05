@@ -67,7 +67,7 @@ public:
     SMFCPP_SMART_PTR_DEFINITIONS(CameraClient)
 
     CameraClient(const std::string & name, 
-        const char * outputUrl);
+        const std::string & outputUrl);
 
     virtual ~CameraClient();
 
@@ -86,7 +86,7 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
-    const char * m_outputUrl;
+    const std::string m_outputUrl;
     bool m_is_open = false;
 };
 

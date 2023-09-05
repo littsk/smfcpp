@@ -1,18 +1,29 @@
-#include "sensor.hpp"
-
+#include <string>
 
 #include <opencv2/video/video.hpp>
 #include <opencv2/opencv.hpp>
 
-namespace smfcpp{
+extern "C" {
+    #include <libavutil/time.h>
+    #include <libavformat/avformat.h>
+    #include <libavutil/timestamp.h> 
+    #include <libavformat/avformat.h>    
+    #include <libavutil/opt.h>
+    #include <libavutil/imgutils.h>
+    #include <libswscale/swscale.h>
+}
 
-template<CameraType T>
-int CameraClient<T>::run(){
+int main(int argc, char * argv[]){
     const cv::Size size = cv::Size(512, 384);
     cv::VideoCapture cap;
     cv::Mat matImage;
-    std::string rtsp_addr = "rtsp://admin:ys88889999@192.168.124.85:554/h264/ch1/main/av_stream";
+    std::string rtsp_addr = argv[1];
+    std::string output_url = argv[2];
+    
+    std::cout << output_url << std::endl;
     std::cout << rtsp_addr << std::endl;
+    
+
     cap = cv::VideoCapture(rtsp_addr);
 
     int width = static_cast<int>(size.width);
@@ -22,17 +33,17 @@ int CameraClient<T>::run(){
     avformat_network_init();
     AVFormatContext* m_octx = NULL;
 
-    avformat_alloc_output_context2(&m_octx, NULL, "flv", m_outputUrl);
+    avformat_alloc_output_context2(&m_octx, NULL, "flv", output_url.c_str());
     if (!m_octx) {
         std::cerr << "Could not create output context" << std::endl;
-        return -1;
+        return 1;
     }
 
     // Change to use libx264 directly
     AVCodec* codec = avcodec_find_encoder_by_name("libx264");
     if (!codec) {
         std::cerr << "Codec libx264 not found" << std::endl;
-        return -1;
+        return 1;
     }
     AVStream* stream = avformat_new_stream(m_octx, codec);
 
@@ -58,14 +69,15 @@ int CameraClient<T>::run(){
 
     avcodec_parameters_from_context(stream->codecpar, m_ctx);
 
-    av_dump_format(m_octx, 0, m_outputUrl, 1);
+    av_dump_format(m_octx, 0, output_url.c_str(), 1);
 
     if (!(m_octx->oformat->flags & AVFMT_NOFILE)) {
-        avio_open(&m_octx->pb, m_outputUrl, AVIO_FLAG_WRITE);
+        avio_open(&m_octx->pb, output_url.c_str(), AVIO_FLAG_WRITE);
     }
 
     if(avformat_write_header(m_octx, NULL) < 0){
         std::cout << "avformat write header error" << std::endl;
+        return 1;
     }
 
     AVFrame* frame = av_frame_alloc();
@@ -111,6 +123,7 @@ int CameraClient<T>::run(){
             // handle the error
             // const char* error_msg = av_err2str(ret);
             std::cerr << "Error receiving packet" << std::endl;
+            return 1;
         }
     }
 
@@ -129,9 +142,4 @@ int CameraClient<T>::run(){
     avformat_free_context(m_octx);
 
     return 0;
-
-}
-
-REGISTER_TEMPLATE(CameraType::HikVision)
-
 }
