@@ -46,6 +46,7 @@ std::vector<CameraClient<CameraType::HikVision>::SharedPtr> get_all_device_by_lo
     }
 
     std::cout << "find " << hik_cameras.size() << " cameras." << std::endl;
+
     return hik_cameras;
 }  
 

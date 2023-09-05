@@ -35,12 +35,7 @@ target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_
 add_executable(video_suvailence video_suvailence.cpp)
 target_link_libraries(video_suvailence ${PROJECT_NAME})
 
+
 add_executable(hik_push hik_push.cpp)
 target_include_directories(hik_push PUBLIC ${INC_DIRS} ${OpenCV_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
 target_link_libraries(hik_push ${OpenCV_LIBS} ${FFMPEG_LIBS})
-
-
-#test 
-add_executable(hik_test hik_test.cpp)
-target_include_directories(hik_test PUBLIC ${INC_DIRS} ${OpenCV_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
-target_link_libraries(hik_test ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_LIBS} smfcpp smfcpp_tool smfcpp_tcp ${MindVison_LIBS})
