@@ -109,6 +109,7 @@ Client::Client(
     m_server_address.sin_family = AF_INET;
     m_server_address.sin_port = htons(port);
     if(inet_pton(AF_INET, m_ip_address.c_str(), &m_server_address.sin_addr) <= 0){
+        perror("inet_pton");
         std::cerr << "client: Invalid IP address" << std::endl;
     }
 
@@ -434,7 +435,8 @@ void Server::run()
                     recv_callback(data);
                 }
                 else{
-                    std::cerr << "server: unknow recive error!" << std::endl;
+                    std::cout << "server: unknow recive error! colse client connect" << std::endl;
+                    losed_clinet_handle(event_fd);
                 }
             }
         }

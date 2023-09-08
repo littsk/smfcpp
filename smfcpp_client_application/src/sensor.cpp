@@ -25,6 +25,8 @@ UartClient::UartClient(
 : tcp::Client(name, ip_address, port)
 {
     m_uart_port = new Uart(uart_file.c_str(), 4800, 8, 'N', 1);
+    // CRC::crc_comlete(addr1to2, 6, mod);
+    // m_uart_port->send(addr1to2, 8);
     collect_timer = this->create_timer(
         std::chrono::seconds(collect_interval), std::bind(&UartClient::collect_data, this));
 }
@@ -34,7 +36,7 @@ UartClient::~UartClient(){
 }
 
 void UartClient::collect_data(){
-    std::vector<uint8_t> m_sensor_data;
+    std::vector<uint8_t> m_sensor_data(16, 0);
 
     CRC::crc_comlete(air_acquire, 6, mod);
     CRC::crc_comlete(soil_acquire, 6, mod);
@@ -45,7 +47,7 @@ void UartClient::collect_data(){
     float hum = (int16_t)((m_sensor_data[3] << 8) | m_sensor_data[4]) / 10.0, 
           tem = (int16_t)((m_sensor_data[5] << 8) | (m_sensor_data[6])) / 10.0,
           co2 = (uint16_t)((m_sensor_data[7] << 8) | (m_sensor_data[8])),
-          light = (uint32_t)((m_sensor_data[9] << 24) | (m_sensor_data[10] << 16) | (m_sensor_data[11] << 8) | (m_sensor_data[12]));
+          light = (uint32_t)((m_sensor_data[9] << 8) | (m_sensor_data[10])); // | (m_sensor_data[11] << 8) | (m_sensor_data[12]));
     std::stringstream air_ss;
     air_ss << "humidity:" << std::fixed << std::setprecision(2) << hum << "%,"
         << "temperature:" << std::fixed << std::setprecision(2) << tem << "centigrade,"
@@ -53,6 +55,7 @@ void UartClient::collect_data(){
         << "light:" << std::fixed << std::setprecision(2) << light << "lux";
     std::string air_str = air_ss.str();
     std::vector<uint8_t> air_data_vec(air_str.begin(), air_str.end());
+    std::cout << air_str << std::endl;
     send_data(air_data_vec);     // send_data_to_server
 
     // soil_data
@@ -68,6 +71,7 @@ void UartClient::collect_data(){
         << "soil electrical conductivity:" << std::fixed << std::setprecision(2) << soil_ec << "us/cm,"
         << "PH:" << std::fixed << std::setprecision(2) << soil_ph;
     std::string soil_str = soil_ss.str();
+    std::cout << soil_str << std::endl;
     std::vector<uint8_t> soil_data_vec(soil_str.begin(), soil_str.end());
     send_data(soil_data_vec); // send_data_to_server
 }
