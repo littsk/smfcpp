@@ -47,6 +47,7 @@ int Uart::open_port(const char * file_pth){
     int fd;
     fd = open(file_pth, O_RDWR | O_NOCTTY | O_NDELAY);
     if(fd == -1){
+        perror("open");
         throw Uart::error("comport didn't exist");
     }
     return fd;

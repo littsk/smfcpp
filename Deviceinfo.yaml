@@ -1,11 +1,16 @@
 DeviceType: hikvision
 
 
-HostIP: 192.168.124.10
+HostIP: 192.168.1.3
 SubnetMaskNum: 24
 Port: 8000
 UserName: admin
-Password: ys88889999
+Password: yx123456
 
 
-RtmpUrls: ["rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1691339863368"]
+RtmpUrls: [
+  "rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1691339863368",
+  "rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1690970451499", 
+  "rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1690344836575",
+  "rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1687784641902"
+]

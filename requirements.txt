@@ -1,3 +1,4 @@
 nmap == 7.80
+libyaml-cpp-dev
 libopencv-dev >= 4.2
 ffmpeg
