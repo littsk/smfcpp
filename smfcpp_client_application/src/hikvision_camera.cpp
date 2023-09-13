@@ -75,7 +75,8 @@ int CameraClient<T>::run(){
     std::string cmd = "./build/smfcpp_client_application/hik_push " + rtsp_addr + " " + m_outputUrl;
 
     std::cout << cmd << std::endl;
-    while(std::system(cmd.c_str()) != 0){
+    while(true){
+        std::system(cmd.c_str());
         std::cerr << "camera: " + m_impl->m_ip + " opened error" << std::endl;
         sleep(10);
     }
