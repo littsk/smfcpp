@@ -9,7 +9,7 @@
 
 #include <sys/stat.h>
 
-static uint8_t air_acquire[8] = {0x02, 0x03, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00};
+static uint8_t air_acquire[8] = {0x02, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00};
 static uint8_t soil_acquire[8] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00};
 static uint8_t addr1to2[8]    = {0x01, 0x06, 0x07, 0xd0, 0x00, 0x02, 0x00, 0x00}; //给设备更换地址使用
 CRC::Mod<uint16_t> mod(0x8005, 0xffff, 0x0000, true, true);
@@ -72,9 +72,9 @@ void UartClient::collect_data(){
     soil_ss << "soil humidity:" << std::fixed << std::setprecision(2) << soil_hum << "%,"
         << "soil temperature:" << std::fixed << std::setprecision(2) << soil_tem << "centigrade,"
         << "soil electrical conductivity:" << std::fixed << std::setprecision(2) << soil_ec << "us/cm,"
-        << "PH:" << std::fixed << std::setprecision(2) << soil_ph
-        << "N:" << std::fixed << std::setprecision(2) << soil_N << "mg/kg"
-        << "P:" << std::fixed << std::setprecision(2) << soil_P << "mg/kg"
+        << "PH:" << std::fixed << std::setprecision(2) << soil_ph << ","
+        << "N:" << std::fixed << std::setprecision(2) << soil_N << "mg/kg,"
+        << "P:" << std::fixed << std::setprecision(2) << soil_P << "mg/kg,"
         << "K:" << std::fixed << std::setprecision(2) << soil_K << "mg/kg";
     std::string soil_str = soil_ss.str();
     std::cout << soil_str << std::endl;
