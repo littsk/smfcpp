@@ -16,30 +16,30 @@ Currently, our smfcpp framework is supported only on Linux-based systems. We hav
    sudo apt install nmap libyaml-cpp-dev libopencv-dev ffmpeg
    ```
 
-3. Ensure that CMake is installed on your system. Then, compile our project:
-
-   ```shell
-   cmake -B build
-   ```
-
-   You can choose to compile the smfcpp framework with or without client and server applications. Use one of the following commands based on your requirements:
+3. Ensure that CMake is installed on your system. Then, compile our project with your desired options. You can choose to compile the smfcpp framework with or without client and server applications by specifying the options during the CMake configuration step:
 
    - Compile only the smfcpp framework:
 
      ```shell
-     cmake --build build
+     cmake -B build
      ```
 
    - Compile the smfcpp framework with the client application:
 
      ```shell
-     cmake --build build -DCOMPILE_CLIENT=NO
+     cmake -B build -DCOMPILE_CLIENT=ON
      ```
 
    - Compile the smfcpp framework with the server application:
 
      ```shell
-     cmake --build build -DCOMPILE_SERVER=NO
+     cmake -B build -DCOMPILE_SERVER=ON
      ```
 
-These instructions will help you set up the smfcpp framework on your Linux system.
+4. Finally, build the project:
+
+   ```shell
+   cmake --build build
+   ```
+
+These instructions will help you set up the smfcpp framework on your Linux system with the specified options and build the project accordingly.
