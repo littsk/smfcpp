@@ -117,10 +117,12 @@ switch( nSpeed )
     cfsetispeed(&newtio, B115200); 
     cfsetospeed(&newtio, B115200); 
     break; 
+    #ifdef __linux__
     case 460800: 
     cfsetispeed(&newtio, B460800); 
     cfsetospeed(&newtio, B460800); 
     break; 
+    #endif
     default: 
     cfsetispeed(&newtio, B9600); 
     cfsetospeed(&newtio, B9600); 

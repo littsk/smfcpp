@@ -7,7 +7,13 @@
 #include <string>
 #include <signal.h>
 #include <unistd.h>
-#include <termio.h>
+
+#ifdef __APPLE__
+#include <termios.h>
+#elif defined(__linux__)
+#include <termios.h>
+#endif
+
 #include <string.h>
 
 #include "fcntl.h"
