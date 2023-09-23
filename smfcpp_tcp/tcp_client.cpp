@@ -10,7 +10,7 @@ void f(smfcpp::tcp::Client::SharedPtr client){
 
 int main(int argc, char * argv[])
 {
-    auto tcp_client = smfcpp::tcp::Client::make_shared("my_tcp_client", "127.0.0.1", 9001);
+    auto tcp_client = smfcpp::tcp::Client::make_shared("my_tcp_client", "127.0.0.1", 8000);
     tcp_client->connect_to_server();
     auto send_timer = tcp_client->create_timer(
         std::chrono::seconds(1), std::bind(f, std::ref(tcp_client)));

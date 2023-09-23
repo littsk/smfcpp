@@ -11,7 +11,7 @@
 #ifdef __APPLE__
 #include <termios.h>
 #elif defined(__linux__)
-#include <termios.h>
+#include <termio.h>
 #endif
 
 #include <string.h>
