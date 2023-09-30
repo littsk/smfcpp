@@ -77,6 +77,7 @@ public:
     execute_callback() override
     {
         m_callback();
+        m_ready.store(false);
         m_condv.notify_one();
     }
 

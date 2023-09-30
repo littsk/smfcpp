@@ -10,7 +10,7 @@ RecverBase::RecverBase(
 
 bool RecverBase::get_ready()
 {
-    bool res = m_ready.exchange(false);
+    bool res = m_ready.load();
     return res;
 }
 
