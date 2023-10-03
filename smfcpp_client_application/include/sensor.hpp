@@ -1,12 +1,13 @@
 #ifndef SMFCPP__SENSOR_HPP_
 #define SMFCPP__SENSOR_HPP_
 
-#include <tcp.hpp>
-#include <uart.hpp>
-
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
+
+#include <tcp.hpp>
+#include <uart.hpp>
 
 extern "C" {
     #include <libavutil/time.h>
@@ -21,6 +22,36 @@ extern "C" {
 
 namespace smfcpp{
 
+struct UartConfig {
+    std::string server_ip;
+    unsigned short server_port;
+    std::uint32_t collect_interval; // Collect interval time (seconds)
+
+    std::filesystem::path file_path;
+    uint32_t baud_rate;
+    uint32_t n_bits;
+    uint32_t n_stops;
+    char check_event;
+    
+    // Static member function to load configuration from the device information file
+    static UartConfig get_config_from_device_info();
+};
+
+enum class CameraType {
+    MindVision,
+    HikVision
+};
+
+
+struct CameraConfig{
+    // these for hikvision
+    std::string ip;
+    std::string user_name;
+    std::string password;
+    unsigned short port;
+
+    // these for mindvision
+};
 
 class UartClient: public tcp::Client
 {
@@ -42,24 +73,6 @@ private:
     Uart * m_uart_port;
     smfcpp::TimerBase::SharedPtr collect_timer;
 };
-
-
-enum class CameraType {
-    MindVision,
-    HikVision
-};
-
-
-struct CameraConfig{
-    // these for hikvision
-    std::string ip;
-    std::string user_name;
-    std::string password;
-    unsigned short port;
-
-    // these for mindvision
-};
-
 
 template<CameraType type>
 class CameraClient{

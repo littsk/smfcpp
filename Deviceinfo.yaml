@@ -1,6 +1,5 @@
 DeviceType: hikvision
 
-
 HostIP: 192.168.1.3
 SubnetMaskNum: 24
 Port: 8000
@@ -14,3 +13,19 @@ RtmpUrls: [
   "rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1690344836575",
   "rtmp://qvs-publish.monitor.pzcnet.com:2045/smartfarm-monitor/1687784641902"
 ]
+
+Farm:
+  ID: 45
+
+Uart:
+  # Read Only
+  ServerIP: 119.29.251.32
+  ServerPort: 9000
+  CollectInterval: 30
+  
+  FilePath: /dev/ttyUSB0
+  BaudRate: 4800
+  NBits: 8
+  CheckEvent: N
+  NStops: 1
+  

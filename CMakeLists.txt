@@ -16,8 +16,6 @@ if(NOT DEFINED COMPILE_SERVER)
     set(COMPILE_SERVER OFF)
 endif()
 
-message(${COMPILE_SERVER})
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfcpp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfcpp_tcp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfcpp_tool)
@@ -27,3 +25,9 @@ endif()
 if(COMPILE_CLIENT)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfcpp_client_application)
 endif()
+
+# Python Extention
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfpy)
+set(INSTALL_DIR "${PROJECT_BINARY_DIR}")
+install(DIRECTORY smfpy DESTINATION "${INSTALL_DIR}")

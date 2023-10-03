@@ -1,13 +1,15 @@
-#include "sensor.hpp"
-
-#include <crc.hpp>
-
 #include <sstream>
 #include <iomanip>
 
-#include <CameraApi.h>
-
 #include <sys/stat.h>
+
+#include <yaml-cpp/yaml.h>
+
+#include <CameraApi.h>
+#include <crc.hpp>
+
+#include "sensor.hpp"
+#include "config.h"
 
 static uint8_t air_acquire[8] = {0x02, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00};
 static uint8_t soil_acquire[8] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00};
@@ -82,6 +84,24 @@ void UartClient::collect_data(){
     send_data(soil_data_vec); // send_data_to_server
 }
 
+UartConfig UartConfig::get_config_from_device_info() {
+    std::filesystem::path device_info_path(DEVICE_INFO_PATH);
+    YAML::Node device_info = YAML::LoadFile(device_info_path);
 
+    UartConfig uart_config;
+    
+    // Load configuration items from the YAML file
+    uart_config.server_ip = device_info["Uart"]["ServerIP"].as<std::string>();
+    uart_config.server_port = device_info["Uart"]["ServerPort"].as<unsigned short>();
+    uart_config.collect_interval = device_info["Uart"]["CollectInterval"].as<std::uint32_t>();
+    
+    uart_config.file_path = device_info["Uart"]["FilePath"].as<std::string>();
+    uart_config.baud_rate = device_info["Uart"]["BaudRate"].as<uint32_t>();
+    uart_config.n_bits = device_info["Uart"]["NBits"].as<uint32_t>();
+    uart_config.n_stops = device_info["Uart"]["NStops"].as<uint32_t>();
+    uart_config.check_event = device_info["Uart"]["CheckEvent"].as<char>();
+
+    return uart_config;
+}
 
 }

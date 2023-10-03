@@ -1,0 +1,6 @@
+#define PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}"
+#define CMAKE_CURRENT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+
+// for smfcpp client application
+#define CACHE_DIR "${CMAKE_SOURCE_DIR}/cache/"
+#define DEVICE_INFO_PATH "${PROJECT_SOURCE_DIR}/Deviceinfo.yaml"
