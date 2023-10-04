@@ -58,9 +58,10 @@ int Uart::receive(uint8_t * buf, size_t count, uint32_t timewait){
 int Uart::open_port(const char * file_pth){
     int fd;
     fd = open(file_pth, O_RDWR | O_NOCTTY | O_NDELAY);
-    if(fd == -1){
-        perror("open");
-        throw Uart::error("comport didn't exist");
+    if(fd < 0){
+        char error_message[256];
+        snprintf(error_message, sizeof(error_message), "Failed to open UART port: %s", strerror(errno));
+        throw Uart::error(error_message);
     }
     return fd;
 }

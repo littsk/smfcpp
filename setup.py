@@ -9,6 +9,7 @@ from setuptools import setup, Extension, find_packages
 from pybind11.setup_helpers import Pybind11Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+import shutil
 
 # # Convert distutils Windows platform specifiers to CMake -A arguments
 # PLAT_TO_CMAKE = {
@@ -127,6 +128,25 @@ from distutils.version import LooseVersion
 #             ["cmake", "--build", ".", "-j4", *build_args], cwd=build_temp, check=True
 #         )
 
+def install_smfpy_file(target_dir="./build"):
+    packages = find_packages()
+    for package in packages:
+        package_dir = os.path.join(package.replace(".", os.path.sep))
+        install_package_dir = os.path.join(target_dir, package_dir)
+        shutil.copytree(package_dir, install_package_dir, dirs_exist_ok=True)
+
+def copy_so_files_recursive(source_dir, target_dir):
+    for root, dirs, files in os.walk(source_dir):
+        # print([root, dirs, files])
+        for file in files:
+            if file.endswith(".so"):
+                source_file = os.path.join(root, file)
+                relative_path = os.path.relpath(source_file, source_dir)
+                target_file = os.path.join(target_dir, relative_path)
+                print([source_file, relative_path, target_file])
+                os.makedirs(os.path.dirname(target_file), exist_ok=True)
+                shutil.copy(source_file, target_file)
+
 def get_setup_parameters():
     packages = find_packages()
     
@@ -146,10 +166,14 @@ def get_setup_parameters():
     return packages, package_data
 
 if __name__ == "__main__":
-    os.chdir("./build")
-    
+    pacakge_name = "smfpy"
+    build_dir = "./build"
+    install_smfpy_file(build_dir)
+    os.chdir(build_dir)
+    copy_so_files_recursive(os.path.join(".", pacakge_name, "_C"), os.path.join(".", pacakge_name))
     packages, package_data = get_setup_parameters()
     print(packages, package_data)
+
     setup(
         name='smfpy',
         version='0.1',

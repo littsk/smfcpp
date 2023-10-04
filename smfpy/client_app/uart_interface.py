@@ -1,5 +1,6 @@
 import curses
-import uart
+
+from . import uart
 
 def get_device_type(stdscr):
     device_types = [uart.SensorDeviceType.SoilSensor, uart.SensorDeviceType.AirSensor]
@@ -59,7 +60,7 @@ def register_device(stdscr):
     stdscr.refresh()
     stdscr.getch()
 
-def list_devices(stdscr):
+def list_all_devices(stdscr):
     stdscr.clear()
     stdscr.addstr(0, 0, "List of Devices")
     devices = uart.list_all_devices()
@@ -97,6 +98,39 @@ def remove_device(stdscr):
     stdscr.refresh()
     stdscr.getch()
 
+def reset_device(stdscr):
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Reset Device ID to 0")
+    stdscr.addstr(2, 0, "Are you sure you want to clear all devices? (Y/N): ")
+    stdscr.refresh()
+
+    input_string = ""  # 用于存储用户输入的字符
+
+    while True:
+        stdscr.addstr(4, 0, input_string)
+        stdscr.refresh()
+
+        key = stdscr.getch()
+
+        if key == 10:  # Enter key
+            break
+        elif key == 127:  # Backspace key
+            input_string = input_string[:-1]
+        elif 32 <= key <= 126:  # ASCII printable characters
+            input_string += chr(key)
+
+    confirm = ord(input_string)
+
+    if confirm == ord('Y') or confirm == ord('y'):
+        if uart.reset_device():
+            stdscr.addstr(4, 0, "Device reset successfully. Press any key to continue.")
+        else:
+            stdscr.addstr(4, 0, "Device reset failed. Press any key to continue.")
+    else:
+        stdscr.addstr(4, 0, "Device reset canceled. Press any key to continue.")
+    stdscr.refresh()
+    stdscr.getch()
+
 def clear_all_devices(stdscr):
     stdscr.clear()
     stdscr.addstr(0, 0, "Clear All Devices")
@@ -118,7 +152,7 @@ def clear_all_devices(stdscr):
         elif 32 <= key <= 126:  # ASCII printable characters
             input_string += chr(key)
 
-    confirm = input_string
+    confirm = ord(input_string)
 
     if confirm == ord('Y') or confirm == ord('y'):
         if uart.clear_all_devices():
@@ -129,46 +163,6 @@ def clear_all_devices(stdscr):
         stdscr.addstr(4, 0, "Clearing canceled. Press any key to continue.")
     stdscr.refresh()
     stdscr.getch()
-
-def main(stdscr):
-    curses.curs_set(0)
-    curses.nodelay(1)
-    stdscr.clear()
-    stdscr.refresh()
-
-    current_option = 0
-    options = ["Register Device", "List Devices", "Remove Device", "Clear All Devices"]
-
-    while True:
-        stdscr.clear()
-        stdscr.addstr(0, 0, "UART Device Management")
-        
-        # 绘制选项列表
-        for i, option in enumerate(options):
-            if i == current_option:
-                stdscr.attron(curses.A_REVERSE)
-            stdscr.addstr(i + 2, 0, f"{i + 1}. {option}")
-            stdscr.attroff(curses.A_REVERSE)
-        
-        stdscr.refresh()
-
-        key = stdscr.getch()
-
-        if key == curses.KEY_UP:
-            current_option = (current_option - 1) % len(options)
-        elif key == curses.KEY_DOWN:
-            current_option = (current_option + 1) % len(options)
-        elif key == 10:  # Enter key
-            if current_option == 0:
-                register_device(stdscr)
-            elif current_option == 1:
-                list_devices(stdscr)
-            elif current_option == 2:
-                remove_device(stdscr)
-            elif current_option == 3:
-                clear_all_devices(stdscr)
-        elif key == 27:  # ESC key to exit
-            break
 
 if __name__ == "__main__":
     curses.wrapper(main)

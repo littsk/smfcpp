@@ -1,8 +1,10 @@
 #include <iostream>
+#include <utility>
 #include <fstream>
 #include <filesystem>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <yaml-cpp/yaml.h>
 #include <glog/logging.h>
 
@@ -13,6 +15,16 @@
 #include "config.h"
 
 namespace py = pybind11;
+
+enum class SensorDeviceType {
+    SoilSensor,
+    AirSensor
+};
+
+namespace
+{
+using id_type_pair = std::pair<uint32_t, std::string>;
+}
 
 bool change_addr(std::shared_ptr<Uart> uart, uint8_t src, uint8_t dst){
     uint8_t addr_change_frame[8] = {0x01, 0x06, 0x07, 0xd0, 0x00, 0x02, 0x00, 0x00}; //给设备更换地址使用
@@ -34,10 +46,30 @@ bool change_addr(std::shared_ptr<Uart> uart, uint8_t src, uint8_t dst){
     return true;
 }
 
-enum class SensorDeviceType {
-    SoilSensor,
-    AirSensor
-};
+void set_addr(uint8_t dst){
+    auto uart_sensor_config = smfcpp::UartSensorConfig::get_config_from_device_info();
+    LOG(INFO) << uart_sensor_config.file_path << " "
+              << uart_sensor_config.baud_rate << " "
+              << uart_sensor_config.n_bits << " "
+              << uart_sensor_config.check_method << " "
+              << uart_sensor_config.n_stops;
+
+    auto uart = Uart::create_uart(
+        uart_sensor_config.file_path,
+        uart_sensor_config.baud_rate,
+        uart_sensor_config.n_bits,
+        uart_sensor_config.check_method,
+        uart_sensor_config.n_stops);
+
+    for (int src = 0; src <= uart_sensor_config.max_addr; ++src) {
+        if (change_addr(uart, src, dst)) {
+            LOG(INFO) << "set this device address to" << uint32_t(dst) << "SUCCESS";
+        }
+    }
+
+    LOG(ERROR) << "set this device address to" << uint32_t(dst) << "FAILED";
+    throw std::runtime_error("Failed to set the device address to " + std::to_string(uint32_t(dst)));
+}
 
 // TODO Make it thread safe
 bool get_device_cache(YAML::Node& device_cache) {
@@ -122,6 +154,7 @@ bool register_device(SensorDeviceType const type, uint32_t const id) {
     std::string device_type = (type == SensorDeviceType::AirSensor) ? "AirSensor" : "SoilSensor";
 
     if (!device_cache[id]) {
+        set_addr(id);
         device_cache[id] = device_type;
         LOG(INFO) << "Registered device at address " << id << ": " << device_type;
     } else {
@@ -140,29 +173,13 @@ bool register_device(SensorDeviceType const type, uint32_t const id) {
 }
 
 bool reset_device() {
-    auto uart_sensor_config = smfcpp::UartSensorConfig::get_config_from_device_info();
-    LOG(INFO) << uart_sensor_config.file_path << " "
-              << uart_sensor_config.baud_rate << " "
-              << uart_sensor_config.n_bits << " "
-              << uart_sensor_config.check_method << " "
-              << uart_sensor_config.n_stops;
-
-    auto uart = Uart::create_uart(
-        uart_sensor_config.file_path,
-        uart_sensor_config.baud_rate,
-        uart_sensor_config.n_bits,
-        uart_sensor_config.check_method,
-        uart_sensor_config.n_stops);
-
-    for (int src = 0; src <= uart_sensor_config.max_addr; ++src) {
-        if (change_addr(uart, src, 0)) {
-            LOG(INFO) << "Reset this device address to 0 SUCCESS";
-            return true;
-        }
+    try{
+        set_addr(0);
+        return true;
+    }   
+    catch (std::exception const & e) {
+        return false;
     }
-
-    LOG(ERROR) << "Reset this device address to 0 FAILED";
-    return false;
 }
 
 bool remove_device(uint32_t const id) {
@@ -193,20 +210,26 @@ bool remove_device(uint32_t const id) {
     return true;
 }
 
-bool list_all_devices() {
+std::vector<id_type_pair> list_all_devices() {
     YAML::Node device_cache;
-    if (get_device_cache(device_cache) == false) {
-        return false;
-    }
+    get_device_cache(device_cache);
+
+    // TODO refactor
+    // if (get_device_cache(device_cache) == false) {
+    //     return false;
+    // }
+
+    std::vector<id_type_pair> result;
 
     LOG(INFO) << "List of all registered devices:";
     for (const auto& entry : device_cache) {
         uint32_t id = entry.first.as<uint32_t>();
         std::string device_type = entry.second.as<std::string>();
+        result.emplace_back(id, device_type);
         LOG(INFO) << "Device at address " << id << ": " << device_type;
     }
 
-    return true;
+    return result;
 }
 
 bool clear_all_devices() {
@@ -225,7 +248,6 @@ bool clear_all_devices() {
 
     return true;
 }
-
 
 PYBIND11_MODULE(C_uart, m) {
     py::enum_<SensorDeviceType>(m, "SensorDeviceType")

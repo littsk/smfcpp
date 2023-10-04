@@ -21,9 +21,9 @@
 
 class Uart{
 public:
-    class error : public std::logic_error{
+    class error : public std::runtime_error{
     public:
-        error(const std::string & str):logic_error(str){}
+        error(const std::string & str):runtime_error(str){}
         virtual ~error() noexcept {}
     };
 

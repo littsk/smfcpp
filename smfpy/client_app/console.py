@@ -1,7 +1,7 @@
 import curses
 from enum import Enum
 
-from . import uart
+from . import uart_interface
 
 class BaseOption(Enum):
     Back = 1
@@ -53,23 +53,16 @@ class Menu:
         elif option == BaseOption.Exit:
             exit()
         else:
-            option()
-            self.wait_for_enter()
-
-    def wait_for_enter(self):
-        self.stdscr.addstr(3, 1, "Press Enter to continue...")
-        self.stdscr.refresh()
-        while self.stdscr.getch() != 10:
-            pass
+            option(self.stdscr)
 
 def main():
     options = {
         "Uart": Menu({
-            "register_device": uart.register_device,
-            "remove_device": uart.remove_device,
-            "reset_device": uart.reset_device,
-            "list_all_devices": uart.list_all_devices,
-            "clear_all_devices": uart.clear_all_devices,
+            "register_device": uart_interface.register_device,
+            "remove_device": uart_interface.remove_device,
+            "reset_device": uart_interface.reset_device,
+            "list_all_devices": uart_interface.list_all_devices,
+            "clear_all_devices": uart_interface.clear_all_devices,
             "Back": BaseOption.Back,
         }),
         # "Sub Menu": Menu({
