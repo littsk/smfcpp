@@ -3,7 +3,7 @@ import curses
 from . import uart
 
 def get_device_type(stdscr):
-    device_types = [uart.SensorDeviceType.SoilSensor, uart.SensorDeviceType.AirSensor]
+    device_types = [uart.UartSensorDeviceType.SoilSensor, uart.UartSensorDeviceType.AirSensor]
     current_type = 0
 
     while True:
@@ -163,6 +163,3 @@ def clear_all_devices(stdscr):
         stdscr.addstr(4, 0, "Clearing canceled. Press any key to continue.")
     stdscr.refresh()
     stdscr.getch()
-
-if __name__ == "__main__":
-    curses.wrapper(main)

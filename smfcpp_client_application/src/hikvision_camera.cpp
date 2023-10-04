@@ -84,5 +84,5 @@ int CameraClient<T>::run(){
     return 0;
 }
 
-REGISTER_TEMPLATE(CameraType::HikVision)
+REGISTER_CAMERA_CLIENT(CameraType::HikVision)
 }

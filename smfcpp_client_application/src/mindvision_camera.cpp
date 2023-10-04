@@ -215,6 +215,6 @@ int CameraClient<T>::run()
     return 0;
 }
 
-REGISTER_TEMPLATE(smfcpp::CameraType::MindVision)
+REGISTER_CAMERA_CLIENT(smfcpp::CameraType::MindVision)
 
 }

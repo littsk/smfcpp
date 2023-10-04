@@ -36,14 +36,14 @@ list(APPEND INC_DIRS ${FFMPEG_INCLUDE_DIRS})
 list(APPEND INC_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
-target_include_directories(${PROJECT_NAME} PUBLIC ${INC_DIRS})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_LIBS} smfcpp smfcpp_tool smfcpp_tcp ${MindVison_LIBS} yaml-cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC ${INC_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(${PROJECT_NAME} ${PUB_LIBS} ${OpenCV_LIBS} ${FFMPEG_LIBS} ${HikVision_LIBS} smfcpp smfcpp_tool smfcpp_tcp ${MindVison_LIBS} yaml-cpp)
 
-add_executable(video_suvailence video_suvailence.cpp)
-target_link_libraries(video_suvailence ${PROJECT_NAME})
+add_executable(video_survailence video_survailence.cpp)
+target_link_libraries(video_survailence ${PROJECT_NAME})
 
-add_executable(uart_client uart_client.cpp)
-target_link_libraries(uart_client ${PROJECT_NAME})
+add_executable(sensor_survailence sensor_survailence.cpp)
+target_link_libraries(sensor_survailence ${PROJECT_NAME})
 
 add_executable(hik_push hik_push.cpp)
 target_include_directories(hik_push PUBLIC ${INC_DIRS})

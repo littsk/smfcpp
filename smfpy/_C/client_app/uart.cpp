@@ -16,7 +16,7 @@
 
 namespace py = pybind11;
 
-enum class SensorDeviceType {
+enum class UartSensorDeviceType {
     SoilSensor,
     AirSensor
 };
@@ -139,7 +139,7 @@ bool save_device_cache(YAML::Node& device_cache) {
     return true;
 }
 
-bool register_device(SensorDeviceType const type, uint32_t const id) {
+bool register_device(UartSensorDeviceType const type, uint32_t const id) {
     auto uart_sensor_config = smfcpp::UartSensorConfig::get_config_from_device_info();
     if (id > uart_sensor_config.max_addr) {
         LOG(ERROR) << "ID must be less than " << uart_sensor_config.max_addr;
@@ -151,10 +151,10 @@ bool register_device(SensorDeviceType const type, uint32_t const id) {
         return false;
     }
 
-    std::string device_type = (type == SensorDeviceType::AirSensor) ? "AirSensor" : "SoilSensor";
+    std::string device_type = (type == UartSensorDeviceType::AirSensor) ? "AirSensor" : "SoilSensor";
 
     if (!device_cache[id]) {
-        set_addr(id);
+        // set_addr(id);
         device_cache[id] = device_type;
         LOG(INFO) << "Registered device at address " << id << ": " << device_type;
     } else {
@@ -250,9 +250,9 @@ bool clear_all_devices() {
 }
 
 PYBIND11_MODULE(C_uart, m) {
-    py::enum_<SensorDeviceType>(m, "SensorDeviceType")
-        .value("SoilSensor", SensorDeviceType::SoilSensor)
-        .value("AirSensor", SensorDeviceType::AirSensor)
+    py::enum_<UartSensorDeviceType>(m, "UartSensorDeviceType")
+        .value("SoilSensor", UartSensorDeviceType::SoilSensor)
+        .value("AirSensor", UartSensorDeviceType::AirSensor)
         .export_values();
 
     m.def("reset_device", &reset_device, "A function that resets devices");

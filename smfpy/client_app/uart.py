@@ -1,8 +1,8 @@
 from . import C_uart
 
-class SensorDeviceType:
-    SoilSensor = C_uart.SensorDeviceType.SoilSensor
-    AirSensor = C_uart.SensorDeviceType.AirSensor
+class UartSensorDeviceType:
+    SoilSensor = C_uart.UartSensorDeviceType.SoilSensor
+    AirSensor = C_uart.UartSensorDeviceType.AirSensor
 
 def reset_device() -> bool:
     """
@@ -13,12 +13,12 @@ def reset_device() -> bool:
     """
     return C_uart.reset_device()
 
-def register_device(device_type: SensorDeviceType, device_id: int) -> bool:
+def register_device(device_type: UartSensorDeviceType, device_id: int) -> bool:
     """
     Register a new device with the specified type and ID.
 
     Args:
-        device_type (SensorDeviceType): The type of the device (SoilSensor or AirSensor).
+        device_type (UartSensorDeviceType): The type of the device (SoilSensor or AirSensor).
         device_id (int): The ID of the device to register.
 
     Returns:
