@@ -7,6 +7,7 @@
 #include <string>
 #include <signal.h>
 #include <unistd.h>
+#include <memory>
 
 #ifdef __APPLE__
 #include <termios.h>
@@ -25,6 +26,7 @@ public:
         error(const std::string & str):logic_error(str){}
         virtual ~error() noexcept {}
     };
+
     Uart(const char * file_pth, int nSpeed, int nBits, char nEvent, int nStop);
 
     int get_fd() const;
@@ -32,6 +34,14 @@ public:
     int receive(uint8_t * buf, size_t count, uint32_t timewait = 100000);
 
     virtual ~Uart();
+
+    static std::shared_ptr<Uart> 
+    create_uart(
+        std::string const & file_path, 
+        uint32_t n_speed,
+        uint32_t n_bits,
+        char check_method,
+        uint32_t n_stops);
 
 private:
     int fd, baudrate;

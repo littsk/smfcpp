@@ -2,3 +2,6 @@
 	path = extern/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
+[submodule "extern/glog"]
+	path = extern/glog
+	url = https://github.com/google/glog.git

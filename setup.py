@@ -155,7 +155,9 @@ if __name__ == "__main__":
         version='0.1',
         packages=packages,
         package_data=package_data,
-        # ext_modules=ext_modules,
-        # ext_modules=[CMakeExtension("smfpy")],
-        # cmdclass={"build_ext": CMakeBuild},
+        entry_points={
+            'console_scripts': [
+                'my_script = smfpy.client_app.console:main',  # 指定要运行的脚本或模块
+            ],
+        },
     )

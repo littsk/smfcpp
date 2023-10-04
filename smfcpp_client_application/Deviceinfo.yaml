@@ -17,7 +17,7 @@ RtmpUrls: [
 Farm:
   ID: 45
 
-Uart:
+UartSensor:
   # Read Only
   ServerIP: 119.29.251.32
   ServerPort: 9000
@@ -26,6 +26,8 @@ Uart:
   FilePath: /dev/ttyUSB0
   BaudRate: 4800
   NBits: 8
-  CheckEvent: N
+  CheckMethod: N
   NStops: 1
+
+  MaxAddr: 255 # uart_sensor最大数量 - 1
   

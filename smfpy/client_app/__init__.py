@@ -1,2 +1,2 @@
-from . import uart_device_controler
+from . import console
 from . import uart

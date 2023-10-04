@@ -1,5 +1,17 @@
 #include "uart.hpp"
 
+std::shared_ptr<Uart> 
+Uart::create_uart(
+    std::string const & file_path, 
+    uint32_t n_speed,
+    uint32_t n_bits,
+    char check_method,
+    uint32_t n_stops)
+{
+    auto uart_ptr = std::make_shared<Uart>(file_path.c_str(), n_speed, n_bits, check_method, n_stops);
+    return uart_ptr;
+}
+
 Uart::Uart(const char * file_pth, int nSpeed, int nBits, char nEvent, int nStop){
     this->fd = this->open_port(file_pth);
     this->baudrate = nSpeed;

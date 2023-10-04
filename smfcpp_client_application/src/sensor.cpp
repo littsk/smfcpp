@@ -84,24 +84,26 @@ void UartClient::collect_data(){
     send_data(soil_data_vec); // send_data_to_server
 }
 
-UartConfig UartConfig::get_config_from_device_info() {
+UartSensorConfig UartSensorConfig::get_config_from_device_info() {
     std::filesystem::path device_info_path(DEVICE_INFO_PATH);
     YAML::Node device_info = YAML::LoadFile(device_info_path);
 
-    UartConfig uart_config;
+    UartSensorConfig uart_sensor_config;
     
     // Load configuration items from the YAML file
-    uart_config.server_ip = device_info["Uart"]["ServerIP"].as<std::string>();
-    uart_config.server_port = device_info["Uart"]["ServerPort"].as<unsigned short>();
-    uart_config.collect_interval = device_info["Uart"]["CollectInterval"].as<std::uint32_t>();
+    uart_sensor_config.server_ip = device_info["UartSensor"]["ServerIP"].as<std::string>();
+    uart_sensor_config.server_port = device_info["UartSensor"]["ServerPort"].as<unsigned short>();
+    uart_sensor_config.collect_interval = device_info["UartSensor"]["CollectInterval"].as<std::uint32_t>();
     
-    uart_config.file_path = device_info["Uart"]["FilePath"].as<std::string>();
-    uart_config.baud_rate = device_info["Uart"]["BaudRate"].as<uint32_t>();
-    uart_config.n_bits = device_info["Uart"]["NBits"].as<uint32_t>();
-    uart_config.n_stops = device_info["Uart"]["NStops"].as<uint32_t>();
-    uart_config.check_event = device_info["Uart"]["CheckEvent"].as<char>();
+    uart_sensor_config.file_path = device_info["UartSensor"]["FilePath"].as<std::string>();
+    uart_sensor_config.baud_rate = device_info["UartSensor"]["BaudRate"].as<uint32_t>();
+    uart_sensor_config.n_bits = device_info["UartSensor"]["NBits"].as<uint32_t>();
+    uart_sensor_config.n_stops = device_info["UartSensor"]["NStops"].as<uint32_t>();
+    uart_sensor_config.check_method = device_info["UartSensor"]["CheckMethod"].as<char>();
 
-    return uart_config;
+    uart_sensor_config.max_addr = device_info["UartSensor"]["MaxAddr"].as<uint32_t>();
+
+    return uart_sensor_config;
 }
 
 }

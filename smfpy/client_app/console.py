@@ -1,6 +1,8 @@
 import curses
 from enum import Enum
 
+from . import uart
+
 class BaseOption(Enum):
     Back = 1
     Exit = 2
@@ -51,7 +53,7 @@ class Menu:
         elif option == BaseOption.Exit:
             exit()
         else:
-            option(self.stdscr)
+            option()
             self.wait_for_enter()
 
     def wait_for_enter(self):
@@ -60,28 +62,27 @@ class Menu:
         while self.stdscr.getch() != 10:
             pass
 
-def perform_function_1(stdscr):
-    stdscr.addstr(1, 1, "Performing Function 1")
-    stdscr.refresh()
-    stdscr.getch()
-
-def perform_function_2(stdscr):
-    stdscr.addstr(1, 1, "Performing Function 2")
-    stdscr.refresh()
-    stdscr.getch()
-
-if __name__ == "__main__":
+def main():
     options = {
-        "Register device": perform_function_1,
-        "Reset device": perform_function_2,
-        "Exit": BaseOption.Exit,
-        "Sub Menu": Menu({
-            "Sub Option 1": perform_function_1,
-            "Sub Option 2": perform_function_2,
+        "Uart": Menu({
+            "register_device": uart.register_device,
+            "remove_device": uart.remove_device,
+            "reset_device": uart.reset_device,
+            "list_all_devices": uart.list_all_devices,
+            "clear_all_devices": uart.clear_all_devices,
             "Back": BaseOption.Back,
-        })
+        }),
+        # "Sub Menu": Menu({
+        #     "Sub Option 1": perform_function_1,
+        #     "Sub Option 2": perform_function_2,
+        #     "Back": BaseOption.Back,
+        # }),
+        "Exit": BaseOption.Exit,
     }
 
     menu = Menu(options)
     menu.run()
+
+if __name__ == "__main__":
+    main()
 

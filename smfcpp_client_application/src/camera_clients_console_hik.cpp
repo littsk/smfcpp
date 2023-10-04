@@ -1,13 +1,13 @@
-#include "camera_clients_console.hpp"
-
-#include <hik/HCNetSDK.h>
-
 #include <regex>
 #include <string>
 #include <queue>
 
 #include <yaml-cpp/yaml.h>
 
+#include <hik/HCNetSDK.h>
+
+#include "camera_clients_console.hpp"
+#include "config.h"
 
 namespace smfcpp{
 
@@ -82,13 +82,15 @@ CameraClientsConsole<T>::CameraClientsConsole(
 : Node(name)
 {
     NET_DVR_Init();
-    YAML::Node config = YAML::LoadFile("Deviceinfo.yaml");
-    std::string host_ip = config["HostIP"].as<std::string>();
-    std::string user_name = config["UserName"].as<std::string>();
-    std::string password = config["Password"].as<std::string>();
-    unsigned short port = config["Port"].as<unsigned short>();
-    int subnet_mask_num = config["SubnetMaskNum"].as<int>();
-    std::vector<std::string> rtmp_urls = config["RtmpUrls"].as<std::vector<std::string>>();
+    std::filesystem::path device_info_path(DEVICE_INFO_PATH);
+    YAML::Node device_info = YAML::LoadFile(device_info_path);
+
+    std::string host_ip = device_info["HostIP"].as<std::string>();
+    std::string user_name = device_info["UserName"].as<std::string>();
+    std::string password = device_info["Password"].as<std::string>();
+    unsigned short port = device_info["Port"].as<unsigned short>();
+    int subnet_mask_num = device_info["SubnetMaskNum"].as<int>();
+    std::vector<std::string> rtmp_urls = device_info["RtmpUrls"].as<std::vector<std::string>>();
 
     std::vector<std::string> candidate_ips = get_candidate_ips(host_ip, subnet_mask_num);
     m_cameras = get_all_device_by_login(candidate_ips, rtmp_urls, user_name, password, port);

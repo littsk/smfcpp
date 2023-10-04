@@ -22,7 +22,7 @@ extern "C" {
 
 namespace smfcpp{
 
-struct UartConfig {
+struct UartSensorConfig {
     std::string server_ip;
     unsigned short server_port;
     std::uint32_t collect_interval; // Collect interval time (seconds)
@@ -31,17 +31,18 @@ struct UartConfig {
     uint32_t baud_rate;
     uint32_t n_bits;
     uint32_t n_stops;
-    char check_event;
+    char check_method;
+
+    uint32_t max_addr;
     
     // Static member function to load configuration from the device information file
-    static UartConfig get_config_from_device_info();
+    static UartSensorConfig get_config_from_device_info();
 };
 
 enum class CameraType {
     MindVision,
     HikVision
 };
-
 
 struct CameraConfig{
     // these for hikvision
@@ -53,6 +54,7 @@ struct CameraConfig{
     // these for mindvision
 };
 
+// TODO: 对每一个UART设备名实现一个单例
 class UartClient: public tcp::Client
 {
 public:

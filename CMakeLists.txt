@@ -6,8 +6,13 @@ project(smf_test)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++17")
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-elide-constructors")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-elide-constructors -fPIC")
 endif()
+
+# Third Party
+add_subdirectory(extern/glog)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
+set(PUB_LIBS glog::glog)
 
 if(NOT DEFINED COMPILE_CLIENT)
     set(COMPILE_CLIENT OFF)
@@ -27,7 +32,6 @@ if(COMPILE_CLIENT)
 endif()
 
 # Python Extention
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfpy)
 set(INSTALL_DIR "${PROJECT_BINARY_DIR}")
 install(DIRECTORY smfpy DESTINATION "${INSTALL_DIR}")

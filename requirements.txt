@@ -2,4 +2,5 @@ nmap == 7.80
 libyaml-cpp-dev
 libopencv-dev >= 4.2
 ffmpeg
-libncurses5-dev 6.2
+libgoogle-glog0v5 
+libgoogle-glog-dev
