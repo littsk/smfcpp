@@ -11,7 +11,7 @@
 #include "sensor.hpp"
 #include "config.h"
 
-static uint8_t air_acquire[8] = {0x02, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00};
+static uint8_t air_acquire[8] = {0x02, 0x03, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00};
 static uint8_t soil_acquire[8] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00};
 CRC::Mod<uint16_t> mod(0x8005, 0xffff, 0x0000, true, true);
 
@@ -26,7 +26,7 @@ UartSensorClient::UartSensorClient(
     auto uart_sensor_config = smfcpp::UartSensorConfig::get_config_from_device_info();
 
     // Create a UART communication interface based on the configuration
-    auto m_uart_port = Uart::create_uart(
+    m_uart_port = Uart::create_uart(
         uart_sensor_config.file_path,
         uart_sensor_config.baud_rate,
         uart_sensor_config.n_bits,
@@ -114,21 +114,23 @@ void UartSensorClient::collect_data() {
 }
 
 void UartSensorClient::collect_air_data(uint8_t device_address) {
-    std::vector<uint8_t> m_sensor_data(11, 0);
+    std::vector<uint8_t> m_sensor_data(15, 0);
 
     // Set address and perform crc checking
     air_acquire[0] = device_address;
     CRC::crc_comlete(air_acquire, 6, mod);
 
     // Collect air sensor data
+    LOG(INFO) << "Begin collect AirSensor data";
     m_uart_port->send(air_acquire, 8);
-    m_uart_port->receive(m_sensor_data.data(), 13);
+    m_uart_port->receive(m_sensor_data.data(), 15);
+    LOG(INFO) << "Finish collect AirSensor data";
 
     // Extract data values
     float hum = (int16_t)((m_sensor_data[3] << 8) | m_sensor_data[4]) / 10.0; 
     float tem = (int16_t)((m_sensor_data[5] << 8) | (m_sensor_data[6])) / 10.0;
     float co2 = (uint16_t)((m_sensor_data[7] << 8) | (m_sensor_data[8]));
-    float light = (uint16_t)((m_sensor_data[9] << 8) | (m_sensor_data[10]));
+    float light = (uint32_t)((m_sensor_data[9] << 24) | (m_sensor_data[10] << 16) | (m_sensor_data[11] << 8) | (m_sensor_data[12]));
 
     // Create a data string
     std::stringstream air_ss;
@@ -148,15 +150,17 @@ void UartSensorClient::collect_air_data(uint8_t device_address) {
 }
 
 void UartSensorClient::collect_soil_data(uint8_t device_address) {
-    std::vector<uint8_t> m_sensor_data(17, 0);
+    std::vector<uint8_t> m_sensor_data(19, 0);
 
     // Set address and perform crc checking
     soil_acquire[0] = device_address;
     CRC::crc_comlete(soil_acquire, 6, mod);
 
     // Collect soil sensor data
+    LOG(INFO) << "Begin collect SoilSensor data";
     m_uart_port->send(soil_acquire, 8);
     m_uart_port->receive(m_sensor_data.data(), 19);
+    LOG(INFO) << "Finish collect SoilSensor data";
 
     // Extract data values
     float soil_hum = (int16_t)((m_sensor_data[3] << 8) | m_sensor_data[4]) / 10.0; 

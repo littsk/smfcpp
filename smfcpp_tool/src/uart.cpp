@@ -33,24 +33,38 @@ int Uart::get_fd() const{
 }
 
 size_t Uart::send(const void *buf, size_t count){
-    return write(this->fd, buf, count);
+    size_t res = write(this->fd, buf, count);
+    if(res < 0){
+        perror("write");
+    }
+    return res;
 }
 
 int Uart::receive(uint8_t * buf, size_t count, uint32_t timewait){
     struct timeval timeout;
     timeout.tv_sec = 0;
     timeout.tv_usec = timewait;
+    printf("%ld\n", timeout.tv_usec);
     fd_set tmp_fds = this->fd_sets;
-    if(select(this->fd + 1, &tmp_fds, NULL, NULL, &timeout) < 0){
+    int res = select(this->fd + 1, &tmp_fds, NULL, NULL, &timeout);
+    if(res < 0){
+        perror("select");
         throw Uart::error("receive error");
     }
-    else if(FD_ISSET(this->fd, &this->fd_sets)){
+    else if(res == 0){
+        printf("time out %ld\n", timeout.tv_usec);
+        return 0;
+    }
+    else if(FD_ISSET(this->fd, &tmp_fds)){
         uint32_t delay_time = (1000000 / (this->baudrate >> 3)) * count * 3 / 2;
         usleep(delay_time);
-        read(this->fd, buf, count);
+        if(read(this->fd, buf, count) < 0){
+            perror("read");
+        }
         return 1;
     }
     else{
+        // never occur
         return 0;
     }
 }

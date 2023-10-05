@@ -56,7 +56,6 @@ namespace CRC{
         for(int i = 0; i < type_len; ++i){
             data[n + i] = crc >> (8 * i);
         }
-        
     }
 }
 

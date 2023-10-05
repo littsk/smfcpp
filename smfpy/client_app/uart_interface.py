@@ -53,20 +53,26 @@ def register_device(stdscr):
     device_type = get_device_type(stdscr)
     device_id = input_string  # 使用输入的字符作为设备ID
 
-    if uart.register_device(device_type, int(device_id)):
+    try:
+        uart.register_device(device_type, int(device_id))
         stdscr.addstr(6, 0, "Device registered successfully. Press any key to continue.")
-    else:
-        stdscr.addstr(6, 0, "Device registration failed. Press any key to continue.")
+    except Exception as e:
+        stdscr.addstr(6, 0, f"Device registration failed: {str(e)}. Press any key to continue.")
     stdscr.refresh()
     stdscr.getch()
 
 def list_all_devices(stdscr):
     stdscr.clear()
     stdscr.addstr(0, 0, "List of Devices")
-    devices = uart.list_all_devices()
-    for i, (device_id, device_type) in enumerate(devices):
-        stdscr.addstr(i + 2, 0, f"Device ID: {device_id}, Device Type: {device_type}")
-    stdscr.addstr(len(devices) + 3, 0, "Press any key to continue.")
+
+    try:
+        devices = uart.list_all_devices()
+        for i, (device_id, device_type) in enumerate(devices):
+            stdscr.addstr(i + 2, 0, f"Device ID: {device_id}, Device Type: {device_type}")
+        stdscr.addstr(len(devices) + 3, 0, "Press any key to continue.")
+    except Exception as e:
+        stdscr.addstr(2, 0, f"Failed to list devices: {str(e)}. Press any key to continue.")
+
     stdscr.refresh()
     stdscr.getch()
 
@@ -91,10 +97,11 @@ def remove_device(stdscr):
             input_string += chr(key)
 
     device_id = input_string  # 使用输入的字符作为设备ID
-    if uart.remove_device(int(device_id)):
+    try:
+        uart.remove_device(int(device_id))
         stdscr.addstr(4, 0, "Device removed successfully. Press any key to continue.")
-    else:
-        stdscr.addstr(4, 0, "Device removal failed. Press any key to continue.")
+    except Exception as e:
+        stdscr.addstr(4, 0, f"Device removal failed: {str(e)}. Press any key to continue.")
     stdscr.refresh()
     stdscr.getch()
 
@@ -122,10 +129,11 @@ def reset_device(stdscr):
     confirm = ord(input_string)
 
     if confirm == ord('Y') or confirm == ord('y'):
-        if uart.reset_device():
+        try:
+            uart.reset_device()
             stdscr.addstr(4, 0, "Device reset successfully. Press any key to continue.")
-        else:
-            stdscr.addstr(4, 0, "Device reset failed. Press any key to continue.")
+        except Exception as e:
+            stdscr.addstr(4, 0, f"Device reset failed: {str(e)}. Press any key to continue.")
     else:
         stdscr.addstr(4, 0, "Device reset canceled. Press any key to continue.")
     stdscr.refresh()
@@ -155,10 +163,11 @@ def clear_all_devices(stdscr):
     confirm = ord(input_string)
 
     if confirm == ord('Y') or confirm == ord('y'):
-        if uart.clear_all_devices():
+        try:
+            uart.clear_all_devices()
             stdscr.addstr(4, 0, "All devices cleared successfully. Press any key to continue.")
-        else:
-            stdscr.addstr(4, 0, "Device clearing failed. Press any key to continue.")
+        except Exception as e:
+            stdscr.addstr(4, 0, f"Device clearing failed: {str(e)}. Press any key to continue.")
     else:
         stdscr.addstr(4, 0, "Clearing canceled. Press any key to continue.")
     stdscr.refresh()

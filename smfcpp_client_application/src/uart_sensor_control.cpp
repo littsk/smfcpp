@@ -1,7 +1,12 @@
 #include <glog/logging.h>
 
+#include <crc.hpp>
+
 #include "sensor.hpp"
 #include "config.h"
+
+
+static CRC::Mod<uint16_t> mod(0x8005, 0xffff, 0x0000, true, true);
 
 namespace smfcpp
 {
@@ -29,11 +34,12 @@ std::string UartSensorControl::device_type_to_str(UartSensorDeviceType const & d
 
 bool UartSensorControl::change_addr(std::shared_ptr<Uart> uart, uint8_t src, uint8_t dst) {
     // Frame for changing device address
-    uint8_t addr_change_frame[8] = {0x01, 0x06, 0x07, 0xd0, 0x00, 0x02, 0x00, 0x00}; 
-    uint8_t response_frame[8] = {0};
-
+    uint8_t addr_change_frame[8] = {0x01, 0x06, 0x07, 0xd0, 0x00, 0x02, 0x00, 0x00};
     addr_change_frame[0] = src;
     addr_change_frame[5] = dst;
+    CRC::crc_comlete(addr_change_frame, 6, mod);
+
+    uint8_t response_frame[8] = {0};
 
     uart->send(addr_change_frame, 8);
     uart->receive(response_frame, 8);
@@ -79,7 +85,7 @@ void UartSensorControl::set_addr(uint8_t dst) {
 
 void UartSensorControl::get_device_cache(YAML::Node& device_cache) {
     std::filesystem::path cache_dir(CACHE_DIR);
-    std::filesystem::path device_cache_path = cache_dir / "device_cache.yaml";
+    std::filesystem::path device_cache_path(DEVICE_CACHE_PATH);
 
     // Create the cache directory if it doesn't exist
     if (!std::filesystem::exists(cache_dir)) {
@@ -104,8 +110,7 @@ void UartSensorControl::get_device_cache(YAML::Node& device_cache) {
 }
 
 void UartSensorControl::save_device_cache(YAML::Node& device_cache) {
-    std::filesystem::path cache_dir(CACHE_DIR);
-    std::filesystem::path device_cache_path = cache_dir / "device_cache.yaml";
+    std::filesystem::path device_cache_path(DEVICE_CACHE_PATH);
 
     YAML::Emitter emitter;
     emitter << device_cache;
@@ -148,12 +153,13 @@ void UartSensorControl::register_device(UartSensorDeviceType const type, uint32_
     // Register the device if it is not already registered
     if (!device_cache[id]) {
         device_cache[id] = device_type;
+        set_addr(id);
         LOG(INFO) << "Registered device at address " << id << ": " << device_type;
     } else {
         // Device with the given ID is already registered
         std::string old_device_type = device_cache[id].as<std::string>();
-        LOG(ERROR) << "Registered device failed" << std::endl
-                   << "Device at address " << id << " is already registered as " << old_device_type
+        LOG(ERROR) << "Registered device failed" << "Device at address " 
+                   << id << " is already registered as " << old_device_type
                    << " Please remove it first.";
         throw std::runtime_error("Device at address " + std::to_string(id) + " is already registered.");
     }
@@ -218,8 +224,8 @@ std::vector<UartSensorControl::id_type_pair> UartSensorControl::list_all_devices
     for (const auto & entry : device_cache) {
         uint32_t id = entry.first.as<uint32_t>();
         std::string device_type = entry.second.as<std::string>();
-        LOG(INFO) << "Device at address " << id << ": " << device_type;
         result.emplace_back(id, device_type);
+        LOG(INFO) << "Device at address " << id << ": " << device_type;
     }
 
     return result;

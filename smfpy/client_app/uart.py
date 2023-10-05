@@ -4,39 +4,30 @@ class UartSensorDeviceType:
     SoilSensor = C_uart.UartSensorDeviceType.SoilSensor
     AirSensor = C_uart.UartSensorDeviceType.AirSensor
 
-def reset_device() -> bool:
+def reset_device() -> None:
     """
     Reset connected devices to address 0.
-    
-    Returns:
-        bool: True if reset was successful, False otherwise.
     """
-    return C_uart.reset_device()
+    C_uart.reset_device()
 
-def register_device(device_type: UartSensorDeviceType, device_id: int) -> bool:
+def register_device(device_type: UartSensorDeviceType, device_id: int) -> None:
     """
     Register a new device with the specified type and ID.
 
     Args:
         device_type (UartSensorDeviceType): The type of the device (SoilSensor or AirSensor).
         device_id (int): The ID of the device to register.
-
-    Returns:
-        bool: True if registration was successful, False otherwise.
     """
-    return C_uart.register_device(device_type, device_id)
+    C_uart.register_device(device_type, device_id)
 
-def remove_device(device_id: int) -> bool:
+def remove_device(device_id: int) -> None:
     """
     Remove a device with the specified ID from the registry.
 
     Args:
         device_id (int): The ID of the device to remove.
-
-    Returns:
-        bool: True if removal was successful, False otherwise.
     """
-    return C_uart.remove_device(device_id)
+    C_uart.remove_device(device_id)
 
 def list_all_devices() -> list:
     """
@@ -47,11 +38,9 @@ def list_all_devices() -> list:
     """
     return C_uart.list_all_devices()
 
-def clear_all_devices() -> bool:
+def clear_all_devices() -> None:
     """
     Clear the registry, removing all registered devices.
-
-    Returns:
-        bool: True if clearing was successful, False otherwise.
     """
-    return C_uart.clear_all_devices()
+    C_uart.clear_all_devices()
+
