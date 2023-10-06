@@ -1,5 +1,7 @@
 #include "uart.hpp"
 
+#include <glog/logging.h>
+
 std::shared_ptr<Uart> 
 Uart::create_uart(
     std::string const & file_path, 
@@ -32,40 +34,40 @@ int Uart::get_fd() const{
     return this->fd;
 }
 
-size_t Uart::send(const void *buf, size_t count){
-    size_t res = write(this->fd, buf, count);
-    if(res < 0){
-        perror("write");
+void Uart::send(const void* buf, size_t count) {
+    ssize_t res = write(this->fd, buf, count);
+    if (res < 0) {
+        throw Uart::error(std::string("write error: ") + strerror(errno));
     }
-    return res;
+    if(res < count){
+        throw Uart::error(std::string("unable to send ") + std::to_string(count) + std::string(" bytes"));
+    }
 }
 
-int Uart::receive(uint8_t * buf, size_t count, uint32_t timewait){
+void Uart::receive(uint8_t* buf, size_t count, std::chrono::milliseconds timewait) {
     struct timeval timeout;
     timeout.tv_sec = 0;
-    timeout.tv_usec = timewait;
-    printf("%ld\n", timeout.tv_usec);
+    timeout.tv_usec = std::chrono::duration_cast<std::chrono::microseconds>(timewait).count();
+    LOG(INFO) << "Timeout: " << timewait.count() << " ms";
+
     fd_set tmp_fds = this->fd_sets;
     int res = select(this->fd + 1, &tmp_fds, NULL, NULL, &timeout);
-    if(res < 0){
-        perror("select");
-        throw Uart::error("receive error");
-    }
-    else if(res == 0){
-        printf("time out %ld\n", timeout.tv_usec);
-        return 0;
-    }
-    else if(FD_ISSET(this->fd, &tmp_fds)){
-        uint32_t delay_time = (1000000 / (this->baudrate >> 3)) * count * 3 / 2;
-        usleep(delay_time);
-        if(read(this->fd, buf, count) < 0){
-            perror("read");
+    if (res > 0) {
+        if (FD_ISSET(this->fd, &tmp_fds)) {
+            // Calculate delay time based on baudrate and data size, wait all data to arrive
+            std::chrono::microseconds delay_time_us((1000000 / (this->baudrate >> 3)) * count * 3 / 2);
+            std::this_thread::sleep_for(delay_time_us);
+
+            // Read data from the UART port
+            ssize_t bytesRead = read(this->fd, buf, count);
+            if (bytesRead < 0) {
+                throw Uart::error(std::string("read error: ") + strerror(errno));
+            }
         }
-        return 1;
-    }
-    else{
-        // never occur
-        return 0;
+    } else if (res == 0) {
+        LOG(INFO) << "Timeout: " << timewait.count() << " ms";
+    } else {
+        throw Uart::error(std::string("select error: ") + strerror(errno));
     }
 }
 
@@ -73,9 +75,7 @@ int Uart::open_port(const char * file_pth){
     int fd;
     fd = open(file_pth, O_RDWR | O_NOCTTY | O_NDELAY);
     if(fd < 0){
-        char error_message[256];
-        snprintf(error_message, sizeof(error_message), "Failed to open UART port: %s", strerror(errno));
-        throw Uart::error(error_message);
+        throw Uart::error(std::string("Failed to open UART port: ") + strerror(errno));
     }
     return fd;
 }

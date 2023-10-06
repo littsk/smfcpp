@@ -1,5 +1,7 @@
 import curses
 from enum import Enum
+import subprocess
+import os
 
 from . import uart_interface
 
@@ -56,6 +58,20 @@ class Menu:
             option(self.stdscr)
 
 def main():
+    # TODO don't use hard code
+    uart_path = "/dev/ttyUSB0"
+    if os.path.exists(uart_path) :
+        try:
+            # 使用 subprocess.run 执行 chmod 命令
+            subprocess.run(["sudo", "chmod", "o+rw", uart_path], check=True)
+            print(f"Added read and write permission for other users to {uart_path}.")
+        except Exception as e:
+            exit()
+    else:
+        print("请连接串口设备")
+        exit()
+        
+
     options = {
         "Uart": Menu({
             "register_device": uart_interface.register_device,
@@ -65,11 +81,6 @@ def main():
             "clear_all_devices": uart_interface.clear_all_devices,
             "Back": BaseOption.Back,
         }),
-        # "Sub Menu": Menu({
-        #     "Sub Option 1": perform_function_1,
-        #     "Sub Option 2": perform_function_2,
-        #     "Back": BaseOption.Back,
-        # }),
         "Exit": BaseOption.Exit,
     }
 
