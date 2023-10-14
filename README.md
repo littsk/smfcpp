@@ -7,6 +7,7 @@ Currently, our smfcpp framework is supported only on Linux-based systems. We hav
 
    ```shell
    git clone https://github.com/littsk/smfcpp.git
+   git submodule update --init
    cd smfcpp
    ```
 
