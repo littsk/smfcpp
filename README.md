@@ -8,12 +8,12 @@ Currently, our smfcpp framework is supported only on Linux-based systems. We hav
    ```shell
    git clone https://github.com/littsk/smfcpp.git
    cd smfcpp
-   git submodule update --init
    ```
 
 2. Install the required dependencies:
 
    ```shell
+   git submodule update --init
    sudo apt install nmap libyaml-cpp-dev libopencv-dev ffmpeg
    ```
 
