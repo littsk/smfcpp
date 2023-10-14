@@ -7,8 +7,8 @@ Currently, our smfcpp framework is supported only on Linux-based systems. We hav
 
    ```shell
    git clone https://github.com/littsk/smfcpp.git
-   git submodule update --init
    cd smfcpp
+   git submodule update --init
    ```
 
 2. Install the required dependencies:
