@@ -41,5 +41,13 @@ Currently, our smfcpp framework is supported only on Linux-based systems. We hav
    ```shell
    cmake --build build
    ```
-
-These instructions will help you set up the smfcpp framework on your Linux system with the specified options and build the project accordingly.
+5. Optionally, if you wish to use this project with the Python extension, you can install the required Python runtime scripts (only applicable to the client):
+   ```shell
+   python3 pip install -r requirements.txt
+   python3 pip instll .
+   ```
+   Then, you can run the provided scripts directly from the command line:
+   ```shell
+   my_script
+   ```
+These instructions will guide you through the setup of the smfcpp framework on your Linux system, allowing you to choose specific options during the installation process.
