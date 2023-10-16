@@ -25,6 +25,8 @@ extern "C" {
 namespace smfcpp{
 
 struct UartSensorConfig {
+    std::uint32_t farm_id;
+    
     std::string server_ip;
     unsigned short server_port;
     // Collect interval time (seconds)
@@ -185,6 +187,7 @@ private:
      */
     void collect_soil_data(uint8_t device_address);
 
+    std::uint32_t m_farm_id;
     std::shared_ptr<Uart> m_uart_port;
     smfcpp::TimerBase::SharedPtr collect_timer;
     smfcpp::RecverBase::SharedPtr device_cache_syncer;

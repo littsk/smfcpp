@@ -14,6 +14,7 @@ UartSensorConfig UartSensorConfig::get_config_from_device_info() {
     UartSensorConfig uart_sensor_config;
     
     // Load configuration items from the YAML file
+    uart_sensor_config.farm_id = device_info["Farm"]["ID"].as<uint32_t>();
     uart_sensor_config.server_ip = device_info["UartSensor"]["ServerIP"].as<std::string>();
     uart_sensor_config.server_port = device_info["UartSensor"]["ServerPort"].as<unsigned short>();
     uart_sensor_config.collect_interval = device_info["UartSensor"]["CollectInterval"].as<std::uint32_t>();

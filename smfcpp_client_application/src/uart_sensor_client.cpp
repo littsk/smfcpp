@@ -25,6 +25,8 @@ UartSensorClient::UartSensorClient(
 {   
     auto uart_sensor_config = smfcpp::UartSensorConfig::get_config_from_device_info();
 
+    m_farm_id = uart_sensor_config.farm_id;
+
     // Create a UART communication interface based on the configuration
     m_uart_port = Uart::create_uart(
         uart_sensor_config.file_path,
@@ -77,6 +79,7 @@ UartSensorClient::UartSensorClient(
 
         // Construct a string representation of all devices
         std::stringstream all_devices_ss;
+        all_devices_ss << "FarmID-" << m_farm_id << ".DeviceUpdate.";
         for (auto const & device : all_devices) {
             all_devices_ss << "Device at address " << device.first << ": " << device.second << "\n";
         }
@@ -134,6 +137,7 @@ void UartSensorClient::collect_air_data(uint8_t device_address) {
 
     // Create a data string
     std::stringstream air_ss;
+    air_ss << "FarmID-" << m_farm_id << ".SensorID-" << (uint32_t)device_address << "." << "Air.";
     air_ss << "humidity:" << std::fixed << std::setprecision(2) << hum << "%,"
         << "temperature:" << std::fixed << std::setprecision(2) << tem << "centigrade,"
         << "co2:" << std::fixed << std::setprecision(2) << co2 << "ppm,"
@@ -173,6 +177,7 @@ void UartSensorClient::collect_soil_data(uint8_t device_address) {
 
     // Create a data string
     std::stringstream soil_ss;
+    soil_ss << "FarmID-" << m_farm_id << ".SensorID-" << (uint32_t)device_address << "." << "Soil.";
     soil_ss << "soil humidity:" << std::fixed << std::setprecision(2) << soil_hum << "%,"
         << "soil temperature:" << std::fixed << std::setprecision(2) << soil_tem << "centigrade,"
         << "soil electrical conductivity:" << std::fixed << std::setprecision(2) << soil_ec << "us/cm,"
