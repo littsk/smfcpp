@@ -29,9 +29,6 @@ if(COMPILE_SERVER)
 endif()
 if(COMPILE_CLIENT)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfcpp_client_application)
+    # Python Extention
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfpy)
 endif()
-
-# Python Extention
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/smfpy)
-set(INSTALL_DIR "${PROJECT_BINARY_DIR}")
-install(DIRECTORY smfpy DESTINATION "${INSTALL_DIR}")

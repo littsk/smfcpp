@@ -44,9 +44,9 @@ Currently, our smfcpp framework is supported only on Linux-based systems. We hav
    ```
 5. Optionally, if you wish to use this project with the Python extension, you can install the required Python runtime scripts (only applicable to the client):
    ```shell
-   python3 pip install -U wheel setuptools
-   python3 pip install -r requirements.txt
-   python3 pip install .
+   python3 -m pip install -U wheel setuptools
+   python3 -m pip install -r requirements.txt
+   python3 -m pip install .
    ```
    Then, you can run the provided scripts directly from the command line:
    ```shell

@@ -4,7 +4,6 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/config.h.in config.h)
 
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(Curses)
 
 find_path(FFMPEG_INCLUDE_DIRS libavcodec/avcodec.h)
 set(FFMPEG_LIB_NAMES avcodec avformat avutil swscale)

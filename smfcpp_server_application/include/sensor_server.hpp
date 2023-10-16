@@ -1,6 +1,8 @@
 #ifndef SMFCPP__SENSOR_SERVER_HPP_
 #define SMFCPP__SENSOR_SERVER_HPP_
 
+#include <filesystem>
+
 #include <tcp.hpp>
 #include <log.hpp>
 
@@ -15,33 +17,15 @@ public:
     UartServer(
         const std::string & name, 
         int port,
-        const std::string & file_name = "../log/logfile");
+        const std::string & log_path);
 
-    virtual ~UartServer();
+    virtual ~UartServer() override;
     virtual void recv_callback(
         std::vector<uint8_t> & data) override;
     
 
 private:
-    log * logfile;
-};
-
-class CameraServer: public tcp::Server
-{
-public:
-    SMFCPP_SMART_PTR_DEFINITIONS(CameraServer)
-    CameraServer(
-        const std::string & name, 
-        int port,
-        size_t max_files = MAX_FILES);
-
-    virtual ~CameraServer() = default;
-
-    virtual void recv_callback(
-        std::vector<uint8_t> & data) override;
-
-private:
-    size_t m_max_files;
+    std::filesystem::path m_log_path;
 };
 
 }

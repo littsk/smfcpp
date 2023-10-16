@@ -5,3 +5,6 @@
 #define CACHE_DIR "${CMAKE_SOURCE_DIR}/cache/"
 #define DEVICE_CACHE_PATH "${CMAKE_SOURCE_DIR}/cache/device_cache.yaml"
 #define DEVICE_INFO_PATH "${PROJECT_SOURCE_DIR}/Deviceinfo.yaml"
+
+// for smfcpp server application
+#define LOG_DIR "${CMAKE_SOURCE_DIR}/log/"
